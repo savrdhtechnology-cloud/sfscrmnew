@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import {
-  ArrowUpRight, BadgeIndianRupee, CalendarClock, CheckCircle2, CircleDollarSign,
-  Clock3, FileCheck2, FileText, Handshake, Landmark, MoreHorizontal, Plus,
-  ShieldCheck, TrendingUp, Users, WalletCards
+  ArrowUpRight, BadgeIndianRupee, Building2, CheckCircle2, FileCheck2,
+  FileText, Handshake, Landmark, MoreHorizontal, Plus, TrendingUp,
+  Users, WalletCards, UploadCloud, UserPlus, FolderUp, Clock3
 } from "lucide-react";
 import { PORTALS } from "@/lib/portals";
 import { ROLES, type Role } from "@/lib/rbac";
@@ -21,29 +21,30 @@ const titles:Record<Role,string>={
 
 const activeMap:Record<Role,string>={
   customer:"Customers",
-  partner:"Commissions",
+  partner:"Partners",
   employee:"Leads",
-  credit:"Credit Analysis",
-  manager:"Applications",
+  credit:"Applications",
+  manager:"Loan Pipeline",
   finance:"Payments",
   owner:"Dashboard",
   lender:"Lenders"
 };
 
-const metrics = [
-  {label:"Total Applications",value:"0",sub:"No live records yet",icon:FileText,tone:"blue"},
-  {label:"Under Credit Review",value:"0",sub:"Pending analysis",icon:BadgeIndianRupee,tone:"violet"},
-  {label:"Sanctioned",value:"0",sub:"Awaiting live lender data",icon:CheckCircle2,tone:"green"},
-  {label:"Disbursement Queue",value:"0",sub:"Finance verification only",icon:WalletCards,tone:"orange"}
+const metricCards = [
+  {label:"Total Leads",value:"—",sub:"Awaiting live D1 data",icon:Users,tone:"gold"},
+  {label:"Active Applications",value:"—",sub:"Awaiting live D1 data",icon:FileText,tone:"violet"},
+  {label:"Sanctioned Amount",value:"—",sub:"Awaiting lender updates",icon:BadgeIndianRupee,tone:"green"},
+  {label:"Active Partners",value:"—",sub:"Awaiting partner data",icon:Handshake,tone:"amber"}
 ] as const;
 
-const pipeline = [
-  {name:"New Applications",count:0,width:"8%"},
-  {name:"Credit Review",count:0,width:"8%"},
-  {name:"Lender Submitted",count:0,width:"8%"},
-  {name:"Sanctioned",count:0,width:"8%"},
-  {name:"Disbursed",count:0,width:"8%"}
-];
+const stages = [
+  {name:"New Leads",count:"—",icon:Users,tone:"blue"},
+  {name:"KYC / Documents",count:"—",icon:FileCheck2,tone:"gold"},
+  {name:"Credit Analysis",count:"—",icon:TrendingUp,tone:"violet"},
+  {name:"Bank Assigned",count:"—",icon:Landmark,tone:"cyan"},
+  {name:"Sanctioned",count:"—",icon:CheckCircle2,tone:"green"},
+  {name:"Disbursed",count:"—",icon:BadgeIndianRupee,tone:"amber"}
+] as const;
 
 export default async function PortalPage({params}:{params:Promise<{role:string}>}){
   const {role}=await params;
@@ -53,108 +54,122 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
 
   return (
     <CrmShell active={activeMap[typedRole]} role={typedRole}>
-      <main className="ref-content">
-        <div className="ref-page-head">
+      <main className="lux-content">
+        <section className="lux-welcome">
           <div>
-            <div className="ref-breadcrumb">Dashboard / {portal.label}</div>
-            <h1>{titles[typedRole]}</h1>
-            <p>Monitor applications, credit workflow, lender activity and finance-controlled transactions.</p>
+            <span>WELCOME BACK,</span>
+            <h1>{typedRole==="owner"?"Savrdh Team":titles[typedRole].replace(" Dashboard","")}!</h1>
+            <p>Here&apos;s what&apos;s happening with your loan business today.</p>
           </div>
-          <div className="ref-head-actions">
-            <button className="ref-outline-btn"><CalendarClock size={15}/> Today</button>
-            <button className="ref-primary-btn"><Plus size={15}/> New Application</button>
-          </div>
-        </div>
+          <div className="lux-slogan">“Bigger Businesses.<br/><em>Brighter Tomorrows</em>”</div>
+        </section>
 
-        <section className="ref-metric-grid">
-          {metrics.map(({label,value,sub,icon:Icon,tone})=>(
-            <article className="ref-metric-card" key={label}>
-              <div className={`ref-metric-icon ${tone}`}><Icon size={18}/></div>
-              <div>
-                <span className="ref-metric-label">{label}</span>
-                <div className="ref-metric-value-row"><strong>{value}</strong><small>—</small></div>
-                <p>{sub}</p>
+        <section className="lux-kpi-grid">
+          {metricCards.map(({label,value,sub,icon:Icon,tone})=>(
+            <article className="lux-kpi" key={label}>
+              <div className={`lux-kpi-icon ${tone}`}><Icon size={22}/></div>
+              <div className="lux-kpi-copy">
+                <span>{label}</span>
+                <div className="lux-kpi-number">{value}</div>
+                <small>{sub}</small>
               </div>
+              <div className={`lux-mini-spark ${tone}`}/>
             </article>
           ))}
         </section>
 
-        <section className="ref-dashboard-grid">
-          <div className="ref-card ref-pipeline-card">
-            <div className="ref-card-head">
-              <div>
-                <h2>Application Pipeline</h2>
-                <p>Current application status distribution</p>
-              </div>
-              <button className="ref-card-menu"><MoreHorizontal size={18}/></button>
+        <section className="lux-main-grid">
+          <div className="lux-card lux-pipeline">
+            <div className="lux-card-head">
+              <div><h2>Loan Pipeline</h2><p>Track applications at every stage</p></div>
+              <button>This Month <ChevronDownIcon/></button>
             </div>
-            <div className="ref-pipeline-list">
-              {pipeline.map((row,index)=>(
-                <div className="ref-pipeline-row" key={row.name}>
-                  <div className="ref-pipeline-name"><span className={`dot d${index+1}`}/>{row.name}</div>
-                  <div className="ref-pipeline-track"><div className={`ref-pipeline-fill f${index+1}`} style={{width:row.width}}/></div>
-                  <strong>{row.count}</strong>
+            <div className="lux-stage-row">
+              {stages.map(({name,count,icon:Icon,tone},index)=>(
+                <div className="lux-stage" key={name}>
+                  <div className={`lux-stage-icon ${tone}`}><Icon size={20}/></div>
+                  {index<stages.length-1&&<div className="lux-stage-line">›</div>}
+                  <span>{name}</span>
+                  <strong>{count}</strong>
+                  <small>Live after D1 binding</small>
                 </div>
               ))}
             </div>
-            <div className="ref-pipeline-foot">
-              <span><TrendingUp size={14}/> Pipeline will populate from Cloudflare D1</span>
-              <button>View applications <ArrowUpRight size={13}/></button>
-            </div>
           </div>
 
-          <div className="ref-card ref-summary-card">
-            <div className="ref-card-head">
-              <div><h2>Quick Summary</h2><p>Operational controls</p></div>
-            </div>
-            <div className="ref-summary-list">
-              <div><span className="sum-icon green"><ShieldCheck size={16}/></span><p><strong>Finance Verification</strong><small>Required before disbursement</small></p><b>ON</b></div>
-              <div><span className="sum-icon blue"><CircleDollarSign size={16}/></span><p><strong>Duplicate UTR Block</strong><small>Transaction-level protection</small></p><b>ON</b></div>
-              <div><span className="sum-icon purple"><Handshake size={16}/></span><p><strong>Commission Basis</strong><small>Verified records only</small></p><b>ON</b></div>
-              <div><span className="sum-icon orange"><FileCheck2 size={16}/></span><p><strong>Audit Trail</strong><small>Sensitive actions logged</small></p><b>ON</b></div>
+          <div className="lux-card lux-actions">
+            <div className="lux-card-head"><div><h2>Quick Actions</h2><p>Common tasks</p></div><button>View All →</button></div>
+            <div className="lux-action-grid">
+              <button><span><Plus size={18}/></span><b>Add Lead</b></button>
+              <button><span><FileText size={18}/></span><b>New Application</b></button>
+              <button><span><UploadCloud size={18}/></span><b>Upload Document</b></button>
+              <button><span><UserPlus size={18}/></span><b>Assign to Team</b></button>
             </div>
           </div>
         </section>
 
-        <section className="ref-bottom-grid">
-          <div className="ref-card">
-            <div className="ref-card-head">
-              <div><h2>Recent Applications</h2><p>Latest customer applications</p></div>
-              <button className="ref-text-btn">View all</button>
+        <section className="lux-charts-grid">
+          <div className="lux-card">
+            <div className="lux-card-head"><div><h2>Applications Trend</h2><p>Monthly application movement</p></div><button>Last 6 Months</button></div>
+            <div className="lux-bars">
+              {[38,22,44,28,53,41,59,49,67,44,55,37].map((h,i)=><i key={i} className={i%2===0?"gold":"slate"} style={{height:`${h}%`}}/>)}
             </div>
-            <div className="ref-table-wrap">
-              <table className="ref-table">
-                <thead><tr><th>APPLICATION</th><th>CUSTOMER</th><th>PRODUCT</th><th>AMOUNT</th><th>STATUS</th><th>ASSIGNED TO</th></tr></thead>
-                <tbody>
-                  <tr className="ref-empty-row"><td colSpan={6}>
-                    <div><FileText size={22}/><strong>No live applications yet</strong><span>D1-connected applications will appear here.</span></div>
-                  </td></tr>
-                </tbody>
+            <div className="lux-chart-labels"><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span></div>
+          </div>
+
+          <div className="lux-card">
+            <div className="lux-card-head"><div><h2>Lead Sources</h2><p>Current month</p></div><button>This Month</button></div>
+            <div className="lux-donut-wrap">
+              <div className="lux-donut bluegold"><strong>—</strong><span>Leads</span></div>
+              <ul><li><i className="l1"/>Partner</li><li><i className="l2"/>Website</li><li><i className="l3"/>Direct</li><li><i className="l4"/>WhatsApp</li></ul>
+            </div>
+          </div>
+
+          <div className="lux-card">
+            <div className="lux-card-head"><div><h2>Loan Types</h2><p>Portfolio mix</p></div><button>This Month</button></div>
+            <div className="lux-donut-wrap">
+              <div className="lux-donut goldblue"><strong>—</strong><span>Applications</span></div>
+              <ul><li><i className="l1"/>Term Loan</li><li><i className="l2"/>Working Capital</li><li><i className="l3"/>Business Loan</li><li><i className="l4"/>Machinery</li></ul>
+            </div>
+          </div>
+
+          <div className="lux-card lux-tasks">
+            <div className="lux-card-head"><div><h2>Today&apos;s Tasks</h2><p>Pending actions</p></div><button>View All →</button></div>
+            <div className="lux-task-list">
+              <div><span><Clock3 size={15}/></span><p><b>Credit review queue</b><small>No live tasks yet</small></p><em>—</em></div>
+              <div><span><Landmark size={15}/></span><p><b>Lender follow-ups</b><small>No live tasks yet</small></p><em>—</em></div>
+              <div><span><WalletCards size={15}/></span><p><b>Finance verification</b><small>No live tasks yet</small></p><em>—</em></div>
+              <div><span><Handshake size={15}/></span><p><b>Partner referrals</b><small>No live tasks yet</small></p><em>—</em></div>
+            </div>
+          </div>
+        </section>
+
+        <section className="lux-bottom-grid">
+          <div className="lux-card">
+            <div className="lux-card-head"><div><h2>Recent Leads & Applications</h2><p>Latest CRM activity</p></div><button>View All →</button></div>
+            <div className="lux-table-wrap">
+              <table className="lux-table">
+                <thead><tr><th>#</th><th>Name</th><th>Business Type</th><th>Loan Amount</th><th>Stage</th><th>Assigned To</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody><tr><td colSpan={8}><div className="lux-empty-table"><FileText size={23}/><strong>No live records yet</strong><span>D1-connected applications will appear here.</span></div></td></tr></tbody>
               </table>
             </div>
           </div>
 
-          <div className="ref-card">
-            <div className="ref-card-head">
-              <div><h2>Tasks & Alerts</h2><p>Pending operational actions</p></div>
-              <button className="ref-text-btn">View all</button>
-            </div>
-            <div className="ref-task-list">
-              <div><span className="task-icon blue"><Clock3 size={16}/></span><p><strong>Credit review queue</strong><small>No pending live records</small></p><em>0</em></div>
-              <div><span className="task-icon orange"><Landmark size={16}/></span><p><strong>Lender follow-ups</strong><small>No pending lender updates</small></p><em>0</em></div>
-              <div><span className="task-icon green"><WalletCards size={16}/></span><p><strong>Finance verification</strong><small>No pending transactions</small></p><em>0</em></div>
-              <div><span className="task-icon purple"><Users size={16}/></span><p><strong>Partner referrals</strong><small>No pending referrals</small></p><em>0</em></div>
+          <div className="lux-card">
+            <div className="lux-card-head"><div><h2>Recent Activities</h2><p>Workflow updates</p></div><button>View All →</button></div>
+            <div className="lux-activity-list">
+              <div><span className="a1"><FileText size={14}/></span><p>New lead activity will appear here</p><small>—</small></div>
+              <div><span className="a2"><FileCheck2 size={14}/></span><p>Document verification events</p><small>—</small></div>
+              <div><span className="a3"><Landmark size={14}/></span><p>Lender submission activity</p><small>—</small></div>
+              <div><span className="a4"><WalletCards size={14}/></span><p>Verified payment activity</p><small>—</small></div>
             </div>
           </div>
-        </section>
-
-        <section className="ref-quick-actions">
-          <button><span><Plus size={16}/></span><div><strong>Create Application</strong><small>Start new credit case</small></div></button>
-          <button><span><Users size={16}/></span><div><strong>Add Customer</strong><small>Create customer profile</small></div></button>
-          <button><span><BadgeIndianRupee size={16}/></span><div><strong>Credit Review</strong><small>Open analysis queue</small></div></button>
-          <button><span><Landmark size={16}/></span><div><strong>Lender Match</strong><small>Review lender options</small></div></button>
         </section>
       </main>
     </CrmShell>
   );
+}
+
+function ChevronDownIcon(){
+  return <span style={{fontSize:10}}>⌄</span>;
 }
