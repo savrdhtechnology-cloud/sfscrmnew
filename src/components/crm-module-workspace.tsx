@@ -30,10 +30,36 @@ export function CrmModuleWorkspace({
   const [saved,setSaved]=useState(false);
 
   useEffect(()=>{
-    try{
-      const raw=localStorage.getItem(storageKey(definition.key));
-      if(raw) setRows(JSON.parse(raw));
-    }catch{}
+    let active=true;
+    (async()=>{
+      try{
+        if(definition.key==="leads"){
+          const {data,error}=await supabase
+            .from("scp_leads")
+            .select("id,name,mobile,email,business_name,source,requested_amount,stage,created_at")
+            .order("created_at",{ascending:false});
+          if(error) throw error;
+          if(active) setRows((data||[]).map((row:any)=>({
+            id:row.id,
+            createdAt:row.created_at,
+            name:row.name||"",
+            mobile:row.mobile||"",
+            email:row.email||"",
+            business:row.business_name||"",
+            loanNeed:row.requested_amount?String(row.requested_amount):"",
+            source:row.source||"",
+            assignedTo:"—",
+            stage:row.stage||""
+          })));
+          return;
+        }
+        const raw=localStorage.getItem(storageKey(definition.key));
+        if(raw && active) setRows(JSON.parse(raw));
+      }catch(err){
+        console.error(err);
+      }
+    })();
+    return ()=>{active=false};
   },[definition.key]);
 
   function persist(next:Row[]){
