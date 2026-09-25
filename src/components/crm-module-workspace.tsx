@@ -196,8 +196,28 @@ function EmptyModule({title}:{title:string}){
 }
 
 function PipelineBoard(){
-  const stages=["New Leads","KYC / Documents","Credit Analysis","Bank Assigned","Sanctioned","Disbursement Verification"];
-  return <div className="pipeline-board">{stages.map((stage,i)=><section className="pipeline-column" key={stage}><header><span>{stage}</span><b>0</b></header><div className="pipeline-dropzone"><FileText size={18}/><small>No applications</small>{i===5&&<em>Finance verified only</em>}</div></section>)}</div>;
+  const stages=["New Application","KYC / Documents","Credit Analysis","Bank Assigned","Sanctioned","Disbursement Pending"];
+  const [apps,setApps]=useState<Row[]>([]);
+  useEffect(()=>{
+    const load=()=>{
+      try{
+        const raw=localStorage.getItem(storageKey("applications"));
+        setApps(raw?JSON.parse(raw):[]);
+      }catch{setApps([])}
+    };
+    load();
+    window.addEventListener("savrdh-crm-update",load);
+    return ()=>window.removeEventListener("savrdh-crm-update",load);
+  },[]);
+  return <div className="pipeline-board">{stages.map(stage=>{
+    const items=apps.filter(app=>(app.stage||"New Application")===stage);
+    return <section className="pipeline-column" key={stage}>
+      <header><span>{stage}</span><b>{items.length}</b></header>
+      <div className="pipeline-dropzone">
+        {items.length===0?<><FileText size={18}/><small>No applications</small></>:items.map(item=><div className="pipeline-item" key={item.id}><strong>{item.customer||"Application"}</strong><span>{item.product||"Loan"}</span></div>)}
+      </div>
+    </section>;
+  })}</div>;
 }
 
 function ReportsPanel(){
