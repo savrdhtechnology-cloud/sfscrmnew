@@ -8,6 +8,7 @@ import {
 import { PORTALS } from "@/lib/portals";
 import { ROLES, type Role } from "@/lib/rbac";
 import { CrmShell } from "@/components/crm-shell";
+import { DEMO_LEADS } from "@/lib/demo-data";
 
 const titles:Record<Role,string>={
   customer:"Customer Dashboard",
@@ -32,19 +33,19 @@ const activeMap:Record<Role,string>={
 };
 
 const metricCards = [
-  {label:"Total Leads",value:"—",sub:"Awaiting live D1 data",icon:Users,tone:"gold"},
-  {label:"Active Applications",value:"—",sub:"Awaiting live D1 data",icon:FileText,tone:"violet"},
-  {label:"Sanctioned Amount",value:"—",sub:"Awaiting lender updates",icon:BadgeIndianRupee,tone:"green"},
-  {label:"Active Partners",value:"—",sub:"Awaiting partner data",icon:Handshake,tone:"amber"}
+  {label:"Total Leads",value:String(DEMO_LEADS.length),sub:"Work mode test leads",icon:Users,tone:"gold"},
+  {label:"Active Applications",value:"0",sub:"Create applications from Quick Actions",icon:FileText,tone:"violet"},
+  {label:"Sanctioned Amount",value:"₹0",sub:"No sanctioned cases yet",icon:BadgeIndianRupee,tone:"green"},
+  {label:"Active Partners",value:"0",sub:"Add partners from Partners module",icon:Handshake,tone:"amber"}
 ] as const;
 
 const stages = [
-  {name:"New Leads",count:"—",icon:Users,tone:"blue"},
-  {name:"KYC / Documents",count:"—",icon:FileCheck2,tone:"gold"},
-  {name:"Credit Analysis",count:"—",icon:TrendingUp,tone:"violet"},
-  {name:"Bank Assigned",count:"—",icon:Landmark,tone:"cyan"},
-  {name:"Sanctioned",count:"—",icon:CheckCircle2,tone:"green"},
-  {name:"Disbursed",count:"—",icon:BadgeIndianRupee,tone:"amber"}
+  {name:"New Leads",count:"2",icon:Users,tone:"blue"},
+  {name:"KYC / Documents",count:"0",icon:FileCheck2,tone:"gold"},
+  {name:"Credit Analysis",count:"1",icon:TrendingUp,tone:"violet"},
+  {name:"Bank Assigned",count:"0",icon:Landmark,tone:"cyan"},
+  {name:"Sanctioned",count:"0",icon:CheckCircle2,tone:"green"},
+  {name:"Disbursed",count:"0",icon:BadgeIndianRupee,tone:"amber"}
 ] as const;
 
 export default async function PortalPage({params}:{params:Promise<{role:string}>}){
@@ -92,7 +93,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
                   {index<stages.length-1&&<div className="lux-stage-line">›</div>}
                   <span>{name}</span>
                   <strong>{count}</strong>
-                  <small>Live after D1 binding</small>
+                  <small>Work mode</small>
                 </div>
               ))}
             </div>
@@ -121,7 +122,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
           <div className="lux-card">
             <div className="lux-card-head"><div><h2>Lead Sources</h2><p>Current month</p></div><button>This Month</button></div>
             <div className="lux-donut-wrap">
-              <div className="lux-donut bluegold"><strong>—</strong><span>Leads</span></div>
+              <div className="lux-donut bluegold"><strong>{DEMO_LEADS.length}</strong><span>Leads</span></div>
               <ul><li><i className="l1"/>Partner</li><li><i className="l2"/>Website</li><li><i className="l3"/>Direct</li><li><i className="l4"/>WhatsApp</li></ul>
             </div>
           </div>
@@ -151,7 +152,20 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
             <div className="lux-table-wrap">
               <table className="lux-table">
                 <thead><tr><th>#</th><th>Name</th><th>Business Type</th><th>Loan Amount</th><th>Stage</th><th>Assigned To</th><th>Date</th><th>Actions</th></tr></thead>
-                <tbody><tr><td colSpan={8}><div className="lux-empty-table"><FileText size={23}/><strong>No live records yet</strong><span>D1-connected applications will appear here.</span></div></td></tr></tbody>
+                <tbody>
+  {DEMO_LEADS.map((lead,index)=>(
+    <tr key={lead.id}>
+      <td>{index+1}</td>
+      <td>{lead.name}</td>
+      <td>{lead.business}</td>
+      <td>₹ {Number(lead.loanNeed).toLocaleString("en-IN")}</td>
+      <td>{lead.stage}</td>
+      <td>{lead.assignedTo}</td>
+      <td>25/09/2026</td>
+      <td><Link href="/crm/leads">View</Link></td>
+    </tr>
+  ))}
+</tbody>
               </table>
             </div>
           </div>
