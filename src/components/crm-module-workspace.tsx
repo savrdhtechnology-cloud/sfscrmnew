@@ -1,0 +1,183 @@
+"use client";
+
+import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft, BadgeIndianRupee, BarChart3, CheckCircle2, FileText, Filter,
+  Landmark, Plus, Search, Settings2, ShieldCheck, SlidersHorizontal,
+  UploadCloud, Users, WalletCards, X
+} from "lucide-react";
+import type { ModuleDef } from "@/lib/crm-modules";
+import { CrmShell } from "@/components/crm-shell";
+
+type Row = Record<string,string> & { id:string; createdAt:string };
+
+function storageKey(key:string){ return `savrdh-crm-${key}`; }
+
+export function CrmModuleWorkspace({
+  definition,
+  initialAction,
+  initialQuery
+}:{
+  definition:ModuleDef;
+  initialAction?:string;
+  initialQuery?:string;
+}){
+  const [rows,setRows]=useState<Row[]>([]);
+  const [query,setQuery]=useState(initialQuery??"");
+  const [open,setOpen]=useState(Boolean(initialAction && definition.fields?.length));
+  const [saved,setSaved]=useState(false);
+
+  useEffect(()=>{
+    try{
+      const raw=localStorage.getItem(storageKey(definition.key));
+      if(raw) setRows(JSON.parse(raw));
+    }catch{}
+  },[definition.key]);
+
+  function persist(next:Row[]){
+    setRows(next);
+    try{ localStorage.setItem(storageKey(definition.key),JSON.stringify(next)); }catch{}
+  }
+
+  function submit(e:FormEvent<HTMLFormElement>){
+    e.preventDefault();
+    const form=new FormData(e.currentTarget);
+    const data:Record<string,string>={};
+    for(const field of definition.fields??[]){
+      if(field.type==="file"){
+        const file=form.get(field.key);
+        data.fileName=file instanceof File ? file.name : "";
+        data[field.key]=data.fileName;
+      }else{
+        data[field.key]=String(form.get(field.key)??"");
+      }
+    }
+    const row:Row={...data,id:crypto.randomUUID(),createdAt:new Date().toISOString()};
+    persist([row,...rows]);
+    e.currentTarget.reset();
+    setOpen(false);
+    setSaved(true);
+    setTimeout(()=>setSaved(false),2500);
+  }
+
+  const filtered=useMemo(()=>{
+    const q=query.trim().toLowerCase();
+    if(!q) return rows;
+    return rows.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+  },[rows,query]);
+
+  const activeMap:Record<string,string>={
+    leads:"Leads",applications:"Applications",pipeline:"Loan Pipeline",customers:"Customers",
+    partners:"Partners",lenders:"Lenders",payments:"Payments",commissions:"Commission",
+    documents:"Documents",reports:"Reports",settings:"Settings",team:"Team Management",audit:"Audit & Controls"
+  };
+
+  return (
+    <CrmShell active={activeMap[definition.key]??""} role="owner">
+      <main className="module-page">
+        <div className="module-page-head">
+          <div>
+            <Link href="/portal/owner" className="module-back"><ArrowLeft size={14}/> Dashboard</Link>
+            <h1>{definition.title}</h1>
+            <p>{definition.subtitle}</p>
+          </div>
+          <div className="module-head-actions">
+            {definition.primaryAction && definition.fields && definition.fields.length>0 && (
+              <button className="module-primary" onClick={()=>setOpen(true)}>
+                {definition.key==="documents"?<UploadCloud size={15}/>:<Plus size={15}/>} {definition.primaryAction}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {saved && <div className="module-success"><CheckCircle2 size={15}/> Saved in this browser preview. Live D1 persistence will replace local preview storage.</div>}
+
+        {definition.key==="pipeline" ? <PipelineBoard/> :
+         definition.key==="reports" ? <ReportsPanel/> :
+         definition.key==="settings" ? <SettingsPanel/> :
+         definition.key==="audit" ? <AuditPanel/> :
+         definition.key==="notifications" ? <NotificationsPanel/> :
+         definition.key==="communications" ? <CommunicationsPanel/> :
+         definition.key==="search" ? <SearchPanel query={query} setQuery={setQuery}/> :
+         <section className="module-card">
+            <div className="module-toolbar">
+              <div className="module-search"><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Search ${definition.title.toLowerCase()}...`}/></div>
+              <div className="module-toolbar-actions"><button><Filter size={14}/> Filter</button><button><SlidersHorizontal size={14}/> Columns</button></div>
+            </div>
+            <div className="module-table-wrap">
+              <table className="module-table">
+                <thead><tr>{(definition.columns??[]).map(c=><th key={c.key}>{c.label}</th>)}<th>Created</th></tr></thead>
+                <tbody>
+                  {filtered.length===0 ? <tr><td colSpan={(definition.columns?.length??0)+1}><EmptyModule title={definition.title}/></td></tr> :
+                    filtered.map(row=><tr key={row.id}>
+                      {(definition.columns??[]).map(c=><td key={c.key}>{row[c.key]||"—"}</td>)}
+                      <td>{new Date(row.createdAt).toLocaleDateString()}</td>
+                    </tr>)
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
+
+        {open && <div className="module-modal-backdrop" onMouseDown={()=>setOpen(false)}>
+          <div className="module-modal" onMouseDown={e=>e.stopPropagation()}>
+            <div className="module-modal-head"><div><h2>{definition.primaryAction}</h2><p>{definition.subtitle}</p></div><button onClick={()=>setOpen(false)}><X size={18}/></button></div>
+            <form onSubmit={submit} className="module-form">
+              {(definition.fields??[]).map(field=><label key={field.key}>
+                <span>{field.label}{field.required?" *":""}</span>
+                {field.type==="select" ? <select name={field.key} required={field.required} defaultValue=""><option value="" disabled>Select</option>{field.options?.map(o=><option key={o}>{o}</option>)}</select> :
+                 <input name={field.key} type={field.type??"text"} required={field.required} placeholder={field.placeholder}/>}
+              </label>)}
+              <div className="module-form-note"><ShieldCheck size={14}/> Sensitive financial completion remains Finance controlled.</div>
+              <div className="module-form-actions"><button type="button" onClick={()=>setOpen(false)}>Cancel</button><button type="submit">Save {definition.singular}</button></div>
+            </form>
+          </div>
+        </div>}
+      </main>
+    </CrmShell>
+  );
+}
+
+function EmptyModule({title}:{title:string}){
+  return <div className="module-empty"><FileText size={24}/><strong>No {title.toLowerCase()} yet</strong><span>Create the first record using the action above.</span></div>;
+}
+
+function PipelineBoard(){
+  const stages=["New Leads","KYC / Documents","Credit Analysis","Bank Assigned","Sanctioned","Disbursement Verification"];
+  return <div className="pipeline-board">{stages.map((stage,i)=><section className="pipeline-column" key={stage}><header><span>{stage}</span><b>0</b></header><div className="pipeline-dropzone"><FileText size={18}/><small>No applications</small>{i===5&&<em>Finance verified only</em>}</div></section>)}</div>;
+}
+
+function ReportsPanel(){
+  const cards=[
+    ["Lead Conversion","Lead-to-application funnel",Users],
+    ["Credit Pipeline","Stage-wise portfolio movement",BarChart3],
+    ["Lender Performance","Sanctions and turnaround",Landmark],
+    ["Finance Reconciliation","Verified payments and disbursements",WalletCards],
+    ["Commission Summary","Verified-basis commission reporting",BadgeIndianRupee],
+    ["Audit Controls","Sensitive action traceability",ShieldCheck]
+  ] as const;
+  return <div className="report-grid">{cards.map(([title,desc,Icon])=><button className="report-card" key={title}><Icon size={20}/><div><strong>{title}</strong><span>{desc}</span></div><em>Open →</em></button>)}</div>;
+}
+
+function SettingsPanel(){
+  const [rules,setRules]=useState({finance:true,utr:true,commission:true,audit:true});
+  return <section className="module-card settings-card"><h2>Business Controls</h2>{Object.entries(rules).map(([key,value])=><div className="setting-row" key={key}><div><strong>{({finance:"Finance-only disbursement verification",utr:"Duplicate UTR protection",commission:"Verified commission basis",audit:"Sensitive action audit"} as Record<string,string>)[key]}</strong><span>Core financial control</span></div><button className={value?"on":""} onClick={()=>setRules({...rules,[key]:!value})}>{value?"ON":"OFF"}</button></div>)}</section>;
+}
+
+function AuditPanel(){
+  return <section className="module-card"><div className="audit-banner"><ShieldCheck size={20}/><div><strong>Audit logging ready</strong><span>Live sensitive-action records will appear once backend persistence is connected.</span></div></div><EmptyModule title="audit events"/></section>;
+}
+
+function NotificationsPanel(){
+  return <section className="module-card"><div className="notification-list"><div><CheckCircle2 size={16}/><p><strong>CRM ready</strong><span>Your premium workspace is active.</span></p><small>Now</small></div><div><Settings2 size={16}/><p><strong>Backend pending</strong><span>Connect D1/API to receive live workflow alerts.</span></p><small>System</small></div></div></section>;
+}
+
+function CommunicationsPanel(){
+  return <section className="module-card communications-placeholder"><div className="comm-icon">W</div><h2>WhatsApp Integration Workspace</h2><p>Conversation sync, templates and automated follow-ups can connect here without redesigning the CRM.</p><button disabled>Connect provider after backend setup</button></section>;
+}
+
+function SearchPanel({query,setQuery}:{query:string;setQuery:(v:string)=>void}){
+  return <section className="module-card search-panel"><div className="module-search large"><Search size={17}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search CRM..."/></div><p>Cross-module search will query D1/API records after backend binding. Current preview records remain module-local.</p></section>;
+}
