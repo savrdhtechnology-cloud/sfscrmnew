@@ -1,30 +1,24 @@
-import { Pool, type PoolClient } from "pg";
-import type { Role } from "@/lib/rbac";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 10,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined
-});
+export type SavrdhCloudflareEnv = CloudflareEnv & {
+  DB: D1Database;
+  DOCUMENTS?: R2Bucket;
+  SESSION_SECRET?: string;
+};
 
-export async function withDbActor<T>(
-  actor: { userId: string; role: Role },
-  work: (client: PoolClient) => Promise<T>
-): Promise<T> {
-  const client = await pool.connect();
-  try {
-    await client.query("begin");
-    await client.query("select set_config('app.user_id', $1, true)", [actor.userId]);
-    await client.query("select set_config('app.role', $1, true)", [actor.role]);
-    const result = await work(client);
-    await client.query("commit");
-    return result;
-  } catch (error) {
-    await client.query("rollback");
-    throw error;
-  } finally {
-    client.release();
-  }
+export function getDb(): D1Database {
+  const { env } = getCloudflareContext();
+  return (env as SavrdhCloudflareEnv).DB;
 }
 
-export { pool };
+export async function getDbAsync(): Promise<D1Database> {
+  const { env } = await getCloudflareContext({ async: true });
+  return (env as SavrdhCloudflareEnv).DB;
+}
+
+export function getDocumentsBucket(): R2Bucket {
+  const { env } = getCloudflareContext();
+  const bucket = (env as SavrdhCloudflareEnv).DOCUMENTS;
+  if (!bucket) throw new Error("Cloudflare R2 binding DOCUMENTS is not configured");
+  return bucket;
+}
