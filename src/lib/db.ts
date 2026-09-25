@@ -1,24 +1,22 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
+/**
+ * Runtime-neutral data access boundary.
+ *
+ * The primary web application can run on Vercel without importing the
+ * Cloudflare Worker runtime. Cloudflare D1/R2 access is kept behind the
+ * optional adapter in ./cloudflare-db.ts and can later be exposed to Vercel
+ * through authenticated API routes/Worker endpoints.
+ */
+export type DatabaseRuntime = "cloudflare-d1" | "external-api" | "unconfigured";
 
-export type SavrdhCloudflareEnv = CloudflareEnv & {
-  DB: D1Database;
-  DOCUMENTS?: R2Bucket;
-  SESSION_SECRET?: string;
-};
-
-export function getDb(): D1Database {
-  const { env } = getCloudflareContext();
-  return (env as SavrdhCloudflareEnv).DB;
+export function getDatabaseRuntime(): DatabaseRuntime {
+  if (process.env.CLOUDFLARE_API_BASE_URL) return "external-api";
+  return "unconfigured";
 }
 
-export async function getDbAsync(): Promise<D1Database> {
-  const { env } = await getCloudflareContext({ async: true });
-  return (env as SavrdhCloudflareEnv).DB;
-}
-
-export function getDocumentsBucket(): R2Bucket {
-  const { env } = getCloudflareContext();
-  const bucket = (env as SavrdhCloudflareEnv).DOCUMENTS;
-  if (!bucket) throw new Error("Cloudflare R2 binding DOCUMENTS is not configured");
-  return bucket;
+export function assertDatabaseConfigured(): void {
+  if (getDatabaseRuntime() === "unconfigured") {
+    throw new Error(
+      "Database backend is not configured. Set CLOUDFLARE_API_BASE_URL or configure another supported adapter."
+    );
+  }
 }
