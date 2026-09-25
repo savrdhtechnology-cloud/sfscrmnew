@@ -1,11 +1,12 @@
 import { createClient } from "@supabase/supabase-js";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const url =
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||
+  "https://qngjmepksxavimwnhtqt.supabase.co";
 
-if (!url || !publishableKey) {
-  throw new Error("Supabase environment variables are not configured");
-}
+const publishableKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  "sb_publishable_rma90Xm4Hy4nT0CEXTlqHQ_6oKKWeds";
 
 export const supabase = createClient(url, publishableKey, {
   auth: {
