@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import type { ModuleDef } from "@/lib/crm-modules";
 import { CrmShell } from "@/components/crm-shell";
+import { supabase } from "@/lib/supabase";
 
 type Row = Record<string,string> & { id:string; createdAt:string };
 
