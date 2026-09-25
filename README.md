@@ -1,83 +1,62 @@
 # Savrdh Credit Platform
 
-Production-grade modular financial CRM + digital credit marketplace being introduced alongside the existing Savrdh Credit CRM.
+This repository is now designed as a **fully independent Cloudflare deployment**.
 
-## Migration strategy
+## Infrastructure
 
-The legacy Vite/React CRM remains untouched while the new platform is developed under `/platform`.
-This lets Savrdh preserve its controlled deal/payment/commission flow during migration and move modules incrementally.
+- Next.js + React + TypeScript
+- Cloudflare Workers via OpenNext
+- Cloudflare D1 for application/CRM data
+- Cloudflare R2 for document storage
+- No Supabase dependency
+- No PostgreSQL dependency
 
-## Portals
+## Role portals
 
-- Customer
-- Partner
-- Employee
-- Credit
-- Manager
-- Finance
-- Owner
-- Future Lender
+Customer, Partner, Employee, Credit, Manager, Finance, Owner and future Lender.
 
-## Core modules
+## Financial control rules
 
-1. Customer onboarding and KYC-ready profiles
-2. Loan applications
-3. MSME financial profiles
-4. Document management
-5. Credit analysis
-6. Lender + product master
-7. Rule-driven lender matching
-8. Lender submission tracking
-9. Sanction workflow
-10. Finance-verified disbursement
-11. Commission ledger
-12. Partner referral management
-13. Audit logs
-14. Notifications
-15. Analytics
-16. Versioned configurable business rules
-17. Integration event outbox / adapter layer
+- Employees and Partners cannot verify payments or disbursements.
+- Only Finance or Owner can verify a pending financial transaction.
+- UTR / transaction IDs are database-unique.
+- Verified financial transactions are immutable.
+- A loan becomes `disbursed` only after Finance/Owner verification of a lender-disbursement transaction.
+- Commission creation requires a verified lender-disbursement transaction.
+- Sensitive finance actions are written to `scp_audit_log`.
 
-## Mandatory financial controls
+## Cloudflare setup
 
-- Partner and Employee roles have no permission to verify a payment/disbursement.
-- A loan becomes `disbursed` only through `scp_verify_transaction()`.
-- `UTR/transaction_id` is unique at database level.
-- Verified transaction amount/reference/type/application/status cannot be edited.
-- Commission calculation accepts only a verified `lender_disbursement`.
-- Sensitive tables have database audit triggers.
-- External integrations write correlation IDs and request/response snapshots to `scp_integration_events`.
+Create two resources in the same Cloudflare account:
 
-## Integration architecture
+1. D1 database named `savrdh-credit-db`
+2. R2 bucket named `savrdh-credit-documents`
 
-Vendor integrations must implement the adapter contract in
-`src/lib/integrations/contracts.ts`.
+Put the D1 database ID into `wrangler.jsonc`.
 
-Future providers can therefore be added for:
+Apply migrations:
 
-- Credit bureau
-- GST
-- Account Aggregator / banking data
-- KYC
-- WhatsApp
-- eSign
-- Lender APIs
+```bash
+npm install
+npm run db:migrate:remote
+```
 
-without changing core loan/application/transaction tables.
+Deploy:
+
+```bash
+npm run deploy
+```
+
+For Cloudflare Git deployments, keep the project connected to this repository and configure the OpenNext build/deploy flow.
 
 ## Database
 
-Apply migrations in `db/migrations` to PostgreSQL. The API should set
-transaction-local `app.user_id` and `app.role` before sensitive writes so
-audit records retain the actor identity and role.
+The D1 schema lives in:
 
-## Next implementation slices
+`db/migrations/001_core_credit_platform.sql`
 
-- Auth/session + PostgreSQL repository
-- Portal layouts and permission-aware navigation
-- Customer onboarding/application screens
-- Operations pipeline
-- Credit workstation
-- Finance verification queue
-- Lender matching engine
-- Analytics + notifications
+It contains the isolated CRM tables for users, customers, partners, MSME profiles, loan applications, documents, credit analysis, lenders/products, lender matching, submissions, financial transactions, commissions, referrals, notifications, business rules, audit logs and integration events.
+
+## Future integrations
+
+External services remain behind adapter contracts so bureau, GST, banking/AA, KYC, WhatsApp, eSign and lender APIs can be added without redesigning the core database.
