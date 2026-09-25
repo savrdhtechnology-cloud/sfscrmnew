@@ -1,76 +1,86 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
-  LayoutDashboard, Files, Users, BadgeIndianRupee, Landmark, WalletCards,
-  Handshake, FolderLock, BarChart3, ShieldCheck, Search, Bell, Settings,
-  Plus, UserPlus, CheckCircle2, ChevronRight
+  LayoutDashboard, Users, UserRoundPlus, FileText, BadgeIndianRupee, Landmark,
+  WalletCards, Handshake, BarChart3, FolderOpen, Settings, Bell, Search,
+  ChevronDown, ShieldCheck, ListChecks, ReceiptIndianRupee, Headphones
 } from "lucide-react";
 
 const nav = [
-  { label: "Dashboard", href: "/", icon: LayoutDashboard },
-  { label: "Applications", href: "/portal/manager", icon: Files },
-  { label: "Customers", href: "/portal/customer", icon: Users },
-  { label: "Credit Analysis", href: "/portal/credit", icon: BadgeIndianRupee },
-  { label: "Lender Marketplace", href: "/portal/lender", icon: Landmark },
-  { label: "Finance & Disbursement", href: "/portal/finance", icon: WalletCards },
-  { label: "Partners", href: "/portal/partner", icon: Handshake },
-  { label: "Documents", href: "/portal/employee", icon: FolderLock },
-  { label: "Analytics", href: "/portal/owner", icon: BarChart3 },
-  { label: "Audit & Controls", href: "/portal/owner", icon: ShieldCheck }
+  { label:"Dashboard", href:"/portal/owner", icon:LayoutDashboard },
+  { label:"Leads", href:"/portal/employee", icon:UserRoundPlus },
+  { label:"Customers", href:"/portal/customer", icon:Users },
+  { label:"Applications", href:"/portal/manager", icon:FileText },
+  { label:"Credit Analysis", href:"/portal/credit", icon:BadgeIndianRupee },
+  { label:"Lenders", href:"/portal/lender", icon:Landmark },
+  { label:"Payments", href:"/portal/finance", icon:WalletCards },
+  { label:"Commissions", href:"/portal/partner", icon:ReceiptIndianRupee },
+  { label:"Reports", href:"/portal/owner", icon:BarChart3 },
+  { label:"Documents", href:"/portal/employee", icon:FolderOpen }
 ];
 
-export function CrmShell({children,active="Dashboard"}:{children:ReactNode;active?:string}) {
+export function CrmShell({
+  children,
+  active="Dashboard",
+  role="owner"
+}:{
+  children:ReactNode;
+  active?:string;
+  role?:string;
+}) {
   return (
-    <div className="crm-shell">
-      <aside className="crm-sidebar">
-        <div className="brand">
-          <div className="brand-mark">S</div>
-          <div className="brand-copy"><div className="brand-title">Savrdh Credit</div><div className="brand-sub">Financial Services</div></div>
+    <div className="ref-crm-shell">
+      <aside className="ref-sidebar">
+        <div className="ref-logo">
+          <div className="ref-logo-mark">S</div>
+          <div>
+            <strong>SAVRDH</strong>
+            <span>Credit CRM</span>
+          </div>
         </div>
-        <div className="nav-section">
-          <div className="nav-kicker">Workspace</div>
-          <nav className="nav-list">
-            {nav.map(({label,href,icon:Icon})=>(
-              <Link key={label} href={href} className={`nav-item ${active===label?"active":""}`}>
-                <Icon className="nav-icon"/><span>{label}</span>
-              </Link>
-            ))}
-          </nav>
+
+        <div className="ref-user-card">
+          <div className="ref-avatar">SF</div>
+          <div className="ref-user-copy">
+            <strong>Savrdh User</strong>
+            <span>{role.charAt(0).toUpperCase()+role.slice(1)} Portal</span>
+          </div>
+          <ChevronDown size={14}/>
         </div>
-        <div className="sidebar-footer"><div className="sidebar-secure"><span className="secure-dot"/><span>Finance-controlled secure workflow</span></div></div>
+
+        <nav className="ref-nav">
+          <div className="ref-nav-label">MAIN MENU</div>
+          {nav.map(({label,href,icon:Icon})=>(
+            <Link key={label} href={href} className={`ref-nav-item ${active===label?"active":""}`}>
+              <Icon size={16}/>
+              <span>{label}</span>
+            </Link>
+          ))}
+          <div className="ref-nav-label second">MANAGEMENT</div>
+          <Link href="/portal/owner" className="ref-nav-item"><ListChecks size={16}/><span>Audit & Controls</span></Link>
+          <Link href="/portal/owner" className="ref-nav-item"><Settings size={16}/><span>Settings</span></Link>
+        </nav>
+
+        <div className="ref-sidebar-foot">
+          <div className="ref-secure"><ShieldCheck size={14}/><span>Secure financial workflow</span></div>
+          <Link href="/" className="ref-help"><Headphones size={14}/> Portal Home</Link>
+        </div>
       </aside>
 
-      <div className="crm-main">
-        <header className="crm-topbar">
-          <div className="search-box"><Search size={16}/><input placeholder="Search customers, applications, UTR, lender..." aria-label="Search CRM"/></div>
-          <div className="top-actions">
-            <span className="env-pill">Cloudflare · Production</span>
-            <button className="icon-btn" aria-label="Notifications"><Bell size={17}/></button>
-            <button className="icon-btn" aria-label="Settings"><Settings size={17}/></button>
-            <div className="avatar">SF</div>
+      <div className="ref-main">
+        <header className="ref-topbar">
+          <div className="ref-search">
+            <Search size={16}/>
+            <input placeholder="Search lead, customer, application, UTR..." />
+          </div>
+          <div className="ref-top-actions">
+            <button className="ref-top-icon"><Bell size={17}/><i/></button>
+            <span className="ref-division">Savrdh Financial Services</span>
+            <div className="ref-top-avatar">SF</div>
           </div>
         </header>
         {children}
       </div>
     </div>
   );
-}
-
-export function PageHeading({eyebrow,title,description,actions=true}:{eyebrow:string;title:string;description:string;actions?:boolean}) {
-  return (
-    <div className="page-heading">
-      <div><div className="eyebrow">{eyebrow}</div><h1 className="page-title">{title}</h1><p className="page-desc">{description}</p></div>
-      {actions&&<div className="heading-actions"><button className="btn btn-secondary"><UserPlus size={16}/> Add Customer</button><button className="btn btn-primary"><Plus size={16}/> New Application</button></div>}
-    </div>
-  );
-}
-
-export function EmptyActivity(){
-  return <div className="empty-state"><div className="empty-icon"><Files size={19}/></div><div className="empty-title">No live activity yet</div><div className="empty-text">Recent applications and workflow events will appear after D1 is connected.</div></div>;
-}
-export function ControlItem({title,description}:{title:string;description:string}){
-  return <div className="control-item"><div className="control-check"><CheckCircle2 size={16}/></div><div><div className="control-title">{title}</div><div className="control-desc">{description}</div></div></div>;
-}
-export function PortalLink({href}:{href:string}){
-  return <Link className="portal-link" href={href}>Open workspace <ChevronRight size={13}/></Link>;
 }
