@@ -29,6 +29,8 @@ export function CrmModuleWorkspace({
   const [query,setQuery]=useState(initialQuery??"");
   const [open,setOpen]=useState(Boolean(initialAction && definition.fields?.length));
   const [saved,setSaved]=useState(false);
+  const [showFilter,setShowFilter]=useState(false);
+  const [compact,setCompact]=useState(false);
 
   useEffect(()=>{
     let active=true;
@@ -70,7 +72,15 @@ export function CrmModuleWorkspace({
 
   function persist(next:Row[]){
     setRows(next);
-    try{ localStorage.setItem(storageKey(definition.key),JSON.stringify(next)); }catch{}
+    try{
+      localStorage.setItem(storageKey(definition.key),JSON.stringify(next));
+      window.dispatchEvent(new Event("savrdh-crm-update"));
+    }catch{}
+  }
+
+  function removeRow(id:string){
+    if(!window.confirm("Delete this record from work mode?")) return;
+    persist(rows.filter(row=>row.id!==id));
   }
 
   function submit(e:FormEvent<HTMLFormElement>){
@@ -136,16 +146,24 @@ export function CrmModuleWorkspace({
          <section className="module-card">
             <div className="module-toolbar">
               <div className="module-search"><Search size={15}/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder={`Search ${definition.title.toLowerCase()}...`}/></div>
-              <div className="module-toolbar-actions"><button><Filter size={14}/> Filter</button><button><SlidersHorizontal size={14}/> Columns</button></div>
+              <div className="module-toolbar-actions"><button type="button" onClick={()=>setShowFilter(!showFilter)}><Filter size={14}/> Filter</button><button type="button" onClick={()=>setCompact(!compact)}><SlidersHorizontal size={14}/> {compact?"Comfortable":"Compact"}</button></div>
             </div>
-            <div className="module-table-wrap">
+            {showFilter&&<div className="module-filter-row">
+              <span>Quick filter</span>
+              <button type="button" onClick={()=>setQuery("")}>All</button>
+              <button type="button" onClick={()=>setQuery("new")}>New</button>
+              <button type="button" onClick={()=>setQuery("active")}>Active</button>
+              <button type="button" onClick={()=>setQuery("pending")}>Pending</button>
+            </div>}
+            <div className={"module-table-wrap"+(compact?" compact":"")}>
               <table className="module-table">
-                <thead><tr>{(definition.columns??[]).map(c=><th key={c.key}>{c.label}</th>)}<th>Created</th></tr></thead>
+                <thead><tr>{(definition.columns??[]).map(c=><th key={c.key}>{c.label}</th>)}<th>Created</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {filtered.length===0 ? <tr><td colSpan={(definition.columns?.length??0)+1}><EmptyModule title={definition.title}/></td></tr> :
+                  {filtered.length===0 ? <tr><td colSpan={(definition.columns?.length??0)+2}><EmptyModule title={definition.title}/></td></tr> :
                     filtered.map(row=><tr key={row.id}>
                       {(definition.columns??[]).map(c=><td key={c.key}>{row[c.key]||"—"}</td>)}
                       <td>{new Date(row.createdAt).toLocaleDateString()}</td>
+                      <td><button type="button" className="row-delete" onClick={()=>removeRow(row.id)}>Delete</button></td>
                     </tr>)
                   }
                 </tbody>
