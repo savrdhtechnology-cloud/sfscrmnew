@@ -229,7 +229,8 @@ function ReportsPanel(){
     ["Commission Summary","Verified-basis commission reporting",BadgeIndianRupee],
     ["Audit Controls","Sensitive action traceability",ShieldCheck]
   ] as const;
-  return <div className="report-grid">{cards.map(([title,desc,Icon])=><button className="report-card" key={title}><Icon size={20}/><div><strong>{title}</strong><span>{desc}</span></div><em>Open →</em></button>)}</div>;
+  const hrefs=["/crm/leads","/crm/pipeline","/crm/lenders","/crm/payments","/crm/commissions","/crm/audit"];
+  return <div className="report-grid">{cards.map(([title,desc,Icon],index)=><Link href={hrefs[index]} className="report-card" key={title}><Icon size={20}/><div><strong>{title}</strong><span>{desc}</span></div><em>Open →</em></Link>)}</div>;
 }
 
 function SettingsPanel(){
