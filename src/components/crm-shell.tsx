@@ -9,16 +9,16 @@ import {
 
 const nav = [
   { label:"Dashboard", href:"/portal/owner", icon:LayoutDashboard },
-  { label:"Leads", href:"/portal/employee", icon:UserRoundPlus },
-  { label:"Applications", href:"/portal/manager", icon:FileText },
-  { label:"Loan Pipeline", href:"/portal/manager", icon:ListChecks },
-  { label:"Customers", href:"/portal/customer", icon:Users },
-  { label:"Partners", href:"/portal/partner", icon:Handshake },
-  { label:"Lenders", href:"/portal/lender", icon:Landmark },
-  { label:"Payments", href:"/portal/finance", icon:WalletCards },
-  { label:"Commission", href:"/portal/partner", icon:ReceiptIndianRupee },
-  { label:"Documents", href:"/portal/employee", icon:FolderOpen },
-  { label:"Reports", href:"/portal/owner", icon:BarChart3 }
+  { label:"Leads", href:"/crm/leads", icon:UserRoundPlus },
+  { label:"Applications", href:"/crm/applications", icon:FileText },
+  { label:"Loan Pipeline", href:"/crm/pipeline", icon:ListChecks },
+  { label:"Customers", href:"/crm/customers", icon:Users },
+  { label:"Partners", href:"/crm/partners", icon:Handshake },
+  { label:"Lenders", href:"/crm/lenders", icon:Landmark },
+  { label:"Payments", href:"/crm/payments", icon:WalletCards },
+  { label:"Commission", href:"/crm/commissions", icon:ReceiptIndianRupee },
+  { label:"Documents", href:"/crm/documents", icon:FolderOpen },
+  { label:"Reports", href:"/crm/reports", icon:BarChart3 }
 ];
 
 export function CrmShell({
@@ -50,7 +50,7 @@ export function CrmShell({
               <span>{label}</span>
             </Link>
           ))}
-          <Link href="/portal/owner" className="lux-nav-item"><Settings size={18}/><span>Settings</span></Link>
+          <Link href="/crm/settings" className="lux-nav-item"><Settings size={18}/><span>Settings</span></Link>
         </nav>
 
         <div className="lux-grow-card">
@@ -70,13 +70,13 @@ export function CrmShell({
         <header className="lux-topbar">
           <div className="lux-search">
             <Search size={17}/>
-            <input placeholder="Search leads, customers, applications, partners..." />
+            <input placeholder="Search leads, customers, applications, partners..." onKeyDown={(e)=>{ if(e.key==="Enter"){ window.location.href=`/crm/search?q=${encodeURIComponent((e.currentTarget as HTMLInputElement).value)}`; } }} />
             <kbd>⌘ K</kbd>
           </div>
 
           <div className="lux-top-actions">
-            <button className="lux-whatsapp"><MessageCircle size={18}/> WhatsApp</button>
-            <button className="lux-bell"><Bell size={18}/><span>3</span></button>
+            <Link href="/crm/communications" className="lux-whatsapp"><MessageCircle size={18}/> WhatsApp</Link>
+            <Link href="/crm/notifications" className="lux-bell"><Bell size={18}/><span>3</span></Link>
             <div className="lux-profile">
               <div className="lux-profile-avatar">SF</div>
               <div>
