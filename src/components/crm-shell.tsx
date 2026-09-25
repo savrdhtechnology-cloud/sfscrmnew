@@ -3,20 +3,22 @@ import type { ReactNode } from "react";
 import {
   LayoutDashboard, Users, UserRoundPlus, FileText, BadgeIndianRupee, Landmark,
   WalletCards, Handshake, BarChart3, FolderOpen, Settings, Bell, Search,
-  ChevronDown, ShieldCheck, ListChecks, ReceiptIndianRupee, Headphones
+  ChevronDown, ShieldCheck, ListChecks, ReceiptIndianRupee, Headphones,
+  MessageCircle, CalendarDays, Sun, Moon
 } from "lucide-react";
 
 const nav = [
   { label:"Dashboard", href:"/portal/owner", icon:LayoutDashboard },
   { label:"Leads", href:"/portal/employee", icon:UserRoundPlus },
-  { label:"Customers", href:"/portal/customer", icon:Users },
   { label:"Applications", href:"/portal/manager", icon:FileText },
-  { label:"Credit Analysis", href:"/portal/credit", icon:BadgeIndianRupee },
+  { label:"Loan Pipeline", href:"/portal/manager", icon:ListChecks },
+  { label:"Customers", href:"/portal/customer", icon:Users },
+  { label:"Partners", href:"/portal/partner", icon:Handshake },
   { label:"Lenders", href:"/portal/lender", icon:Landmark },
   { label:"Payments", href:"/portal/finance", icon:WalletCards },
-  { label:"Commissions", href:"/portal/partner", icon:ReceiptIndianRupee },
-  { label:"Reports", href:"/portal/owner", icon:BarChart3 },
-  { label:"Documents", href:"/portal/employee", icon:FolderOpen }
+  { label:"Commission", href:"/portal/partner", icon:ReceiptIndianRupee },
+  { label:"Documents", href:"/portal/employee", icon:FolderOpen },
+  { label:"Reports", href:"/portal/owner", icon:BarChart3 }
 ];
 
 export function CrmShell({
@@ -29,56 +31,68 @@ export function CrmShell({
   role?:string;
 }) {
   return (
-    <div className="ref-crm-shell">
-      <aside className="ref-sidebar">
-        <div className="ref-logo">
-          <div className="ref-logo-mark">S</div>
+    <div className="lux-crm-shell">
+      <aside className="lux-sidebar">
+        <div className="lux-sidebar-glow"/>
+        <div className="lux-brand">
+          <div className="lux-brand-mark">S</div>
           <div>
             <strong>SAVRDH</strong>
-            <span>Credit CRM</span>
+            <span>Financial Services</span>
           </div>
         </div>
+        <div className="lux-tagline">FINANCING TODAY<br/>A STRONGER TOMORROW</div>
 
-        <div className="ref-user-card">
-          <div className="ref-avatar">SF</div>
-          <div className="ref-user-copy">
-            <strong>Savrdh User</strong>
-            <span>{role.charAt(0).toUpperCase()+role.slice(1)} Portal</span>
-          </div>
-          <ChevronDown size={14}/>
-        </div>
-
-        <nav className="ref-nav">
-          <div className="ref-nav-label">MAIN MENU</div>
+        <nav className="lux-nav">
           {nav.map(({label,href,icon:Icon})=>(
-            <Link key={label} href={href} className={`ref-nav-item ${active===label?"active":""}`}>
-              <Icon size={16}/>
+            <Link key={label} href={href} className={`lux-nav-item ${active===label?"active":""}`}>
+              <Icon size={18}/>
               <span>{label}</span>
             </Link>
           ))}
-          <div className="ref-nav-label second">MANAGEMENT</div>
-          <Link href="/portal/owner" className="ref-nav-item"><ListChecks size={16}/><span>Audit & Controls</span></Link>
-          <Link href="/portal/owner" className="ref-nav-item"><Settings size={16}/><span>Settings</span></Link>
+          <Link href="/portal/owner" className="lux-nav-item"><Settings size={18}/><span>Settings</span></Link>
         </nav>
 
-        <div className="ref-sidebar-foot">
-          <div className="ref-secure"><ShieldCheck size={14}/><span>Secure financial workflow</span></div>
-          <Link href="/" className="ref-help"><Headphones size={14}/> Portal Home</Link>
+        <div className="lux-grow-card">
+          <div className="lux-crown">✦</div>
+          <strong>Grow Together</strong>
+          <span>Empower businesses.<br/>Finance a stronger tomorrow.</span>
+          <i>→</i>
+        </div>
+
+        <div className="lux-side-foot">
+          <ShieldCheck size={15}/>
+          <span>SAVRDH Financial Services Pvt. Ltd.<br/><small>Secure credit operations</small></span>
         </div>
       </aside>
 
-      <div className="ref-main">
-        <header className="ref-topbar">
-          <div className="ref-search">
-            <Search size={16}/>
-            <input placeholder="Search lead, customer, application, UTR..." />
+      <div className="lux-main">
+        <header className="lux-topbar">
+          <div className="lux-search">
+            <Search size={17}/>
+            <input placeholder="Search leads, customers, applications, partners..." />
+            <kbd>⌘ K</kbd>
           </div>
-          <div className="ref-top-actions">
-            <button className="ref-top-icon"><Bell size={17}/><i/></button>
-            <span className="ref-division">Savrdh Financial Services</span>
-            <div className="ref-top-avatar">SF</div>
+
+          <div className="lux-top-actions">
+            <button className="lux-whatsapp"><MessageCircle size={18}/> WhatsApp</button>
+            <button className="lux-bell"><Bell size={18}/><span>3</span></button>
+            <div className="lux-profile">
+              <div className="lux-profile-avatar">SF</div>
+              <div>
+                <strong>Savrdh User</strong>
+                <span>{role.charAt(0).toUpperCase()+role.slice(1)} Portal</span>
+              </div>
+              <ChevronDown size={15}/>
+            </div>
           </div>
         </header>
+
+        <div className="lux-subbar">
+          <div className="lux-date"><CalendarDays size={15}/> Fri, 25 Sep 2026</div>
+          <div className="lux-theme-toggle"><Sun size={15}/><Moon size={15}/></div>
+        </div>
+
         {children}
       </div>
     </div>
