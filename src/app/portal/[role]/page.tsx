@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowUpRight, BadgeIndianRupee, Building2, CheckCircle2, FileCheck2,
   FileText, Handshake, Landmark, MoreHorizontal, Plus, TrendingUp,
@@ -82,7 +83,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
           <div className="lux-card lux-pipeline">
             <div className="lux-card-head">
               <div><h2>Loan Pipeline</h2><p>Track applications at every stage</p></div>
-              <button>This Month <ChevronDownIcon/></button>
+              <Link href="/crm/pipeline">This Month <ChevronDownIcon/></Link>
             </div>
             <div className="lux-stage-row">
               {stages.map(({name,count,icon:Icon,tone},index)=>(
@@ -98,12 +99,12 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
           </div>
 
           <div className="lux-card lux-actions">
-            <div className="lux-card-head"><div><h2>Quick Actions</h2><p>Common tasks</p></div><button>View All →</button></div>
+            <div className="lux-card-head"><div><h2>Quick Actions</h2><p>Common tasks</p></div><Link href="/crm/applications">View All →</Link></div>
             <div className="lux-action-grid">
-              <button><span><Plus size={18}/></span><b>Add Lead</b></button>
-              <button><span><FileText size={18}/></span><b>New Application</b></button>
-              <button><span><UploadCloud size={18}/></span><b>Upload Document</b></button>
-              <button><span><UserPlus size={18}/></span><b>Assign to Team</b></button>
+              <Link href="/crm/leads?action=create"><span><Plus size={18}/></span><b>Add Lead</b></Link>
+              <Link href="/crm/applications?action=create"><span><FileText size={18}/></span><b>New Application</b></Link>
+              <Link href="/crm/documents?action=create"><span><UploadCloud size={18}/></span><b>Upload Document</b></Link>
+              <Link href="/crm/team?action=create"><span><UserPlus size={18}/></span><b>Assign to Team</b></Link>
             </div>
           </div>
         </section>
@@ -134,7 +135,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
           </div>
 
           <div className="lux-card lux-tasks">
-            <div className="lux-card-head"><div><h2>Today&apos;s Tasks</h2><p>Pending actions</p></div><button>View All →</button></div>
+            <div className="lux-card-head"><div><h2>Today&apos;s Tasks</h2><p>Pending actions</p></div><Link href="/crm/notifications">View All →</Link></div>
             <div className="lux-task-list">
               <div><span><Clock3 size={15}/></span><p><b>Credit review queue</b><small>No live tasks yet</small></p><em>—</em></div>
               <div><span><Landmark size={15}/></span><p><b>Lender follow-ups</b><small>No live tasks yet</small></p><em>—</em></div>
@@ -146,7 +147,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
 
         <section className="lux-bottom-grid">
           <div className="lux-card">
-            <div className="lux-card-head"><div><h2>Recent Leads & Applications</h2><p>Latest CRM activity</p></div><button>View All →</button></div>
+            <div className="lux-card-head"><div><h2>Recent Leads & Applications</h2><p>Latest CRM activity</p></div><Link href="/crm/applications">View All →</Link></div>
             <div className="lux-table-wrap">
               <table className="lux-table">
                 <thead><tr><th>#</th><th>Name</th><th>Business Type</th><th>Loan Amount</th><th>Stage</th><th>Assigned To</th><th>Date</th><th>Actions</th></tr></thead>
@@ -156,7 +157,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
           </div>
 
           <div className="lux-card">
-            <div className="lux-card-head"><div><h2>Recent Activities</h2><p>Workflow updates</p></div><button>View All →</button></div>
+            <div className="lux-card-head"><div><h2>Recent Activities</h2><p>Workflow updates</p></div><Link href="/crm/audit">View All →</Link></div>
             <div className="lux-activity-list">
               <div><span className="a1"><FileText size={14}/></span><p>New lead activity will appear here</p><small>—</small></div>
               <div><span className="a2"><FileCheck2 size={14}/></span><p>Document verification events</p><small>—</small></div>
