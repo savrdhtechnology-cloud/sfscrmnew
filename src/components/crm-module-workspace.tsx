@@ -10,6 +10,7 @@ import {
 import type { ModuleDef } from "@/lib/crm-modules";
 import { CrmShell } from "@/components/crm-shell";
 import { supabase } from "@/lib/supabase";
+import { DEMO_LEADS } from "@/lib/demo-data";
 
 type Row = Record<string,string> & { id:string; createdAt:string };
 
@@ -38,7 +39,12 @@ export function CrmModuleWorkspace({
             .from("scp_leads")
             .select("id,name,mobile,email,business_name,source,requested_amount,stage,created_at")
             .order("created_at",{ascending:false});
-          if(error) throw error;
+          if(error){
+            const local=localStorage.getItem(storageKey(definition.key));
+            if(local && active) setRows(JSON.parse(local));
+            else if(active) setRows(DEMO_LEADS.map(row=>({...row})));
+            return;
+          }
           if(active) setRows((data||[]).map((row:any)=>({
             id:row.id,
             createdAt:row.created_at,
