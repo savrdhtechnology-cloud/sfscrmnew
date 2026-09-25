@@ -17,7 +17,7 @@ const portals = [
 
 export default function HomePage(){
   return (
-    <main className="landing">
+    <main className="landing" data-ui-version="premium-v2">
       <header className="landing-nav">
         <Link href="/" className="landing-brand">
           <span className="landing-logo">S</span>
