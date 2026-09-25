@@ -251,5 +251,36 @@ function CommunicationsPanel(){
 }
 
 function SearchPanel({query,setQuery}:{query:string;setQuery:(v:string)=>void}){
-  return <section className="module-card search-panel"><div className="module-search large"><Search size={17}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search CRM..."/></div><p>Cross-module search will query D1/API records after backend binding. Current preview records remain module-local.</p></section>;
+  const [results,setResults]=useState<Array<{module:string;label:string;detail:string}>>([]);
+  useEffect(()=>{
+    const q=query.trim().toLowerCase();
+    if(!q){setResults([]);return;}
+    const found:Array<{module:string;label:string;detail:string}>=[];
+    const keys=["leads","applications","customers","partners","lenders","payments","documents","team"];
+    for(const key of keys){
+      let rows:any[]=[];
+      try{
+        const raw=localStorage.getItem(storageKey(key));
+        rows=raw?JSON.parse(raw):[];
+      }catch{}
+      if(key==="leads" && rows.length===0) rows=DEMO_LEADS.map(row=>({...row}));
+      for(const row of rows){
+        const text=Object.values(row).join(" ").toLowerCase();
+        if(text.includes(q)){
+          found.push({
+            module:key,
+            label:String(row.name||row.customer||row.business||row.owner||row.email||"Record"),
+            detail:String(row.stage||row.status||row.product||row.source||"")
+          });
+        }
+      }
+    }
+    setResults(found.slice(0,50));
+  },[query]);
+
+  return <section className="module-card search-panel">
+    <div className="module-search large"><Search size={17}/><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search CRM..."/></div>
+    {query&&!results.length?<div className="module-empty"><Search size={22}/><strong>No matching records</strong><span>Try another name, business, stage or status.</span></div>:
+      <div className="search-results">{results.map((r,i)=><Link key={i} href={"/crm/"+r.module} className="search-result"><div><strong>{r.label}</strong><span>{r.module} · {r.detail}</span></div><em>Open →</em></Link>)}</div>}
+  </section>;
 }
