@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import {
   BarChart3, CalendarDays, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight,
   Clock3, Download, Filter, MoreHorizontal, Plus, Search,
@@ -258,7 +259,7 @@ export function LeadsWorkspace(){
               visible.map((row,index)=><tr key={row.id}>
                 <td><input type="checkbox"/></td>
                 <td>{(safePage-1)*pageSize+index+1}</td>
-                <td className="lead-name">{row.name}</td>
+                <td className="lead-name"><Link href={"/crm/leads/"+row.id}>{row.name}</Link></td>
                 <td>{row.mobile||"—"}</td>
                 <td>{row.businessType||row.business||"—"}</td>
                 <td>{row.loanType||"—"}</td>
@@ -267,7 +268,7 @@ export function LeadsWorkspace(){
                 <td>{row.source||"—"}</td>
                 <td>{row.assignedTo||"Unassigned"}</td>
                 <td>{new Date(row.createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td>
-                <td><button className="lead-more" onClick={()=>removeLead(row.id)} title="Delete lead"><MoreHorizontal size={17}/></button></td>
+                <td><div className="lead-row-actions"><Link href={"/crm/leads/"+row.id}>Open</Link><button className="lead-more" onClick={()=>removeLead(row.id)} title="Delete lead"><MoreHorizontal size={17}/></button></div></td>
               </tr>)}
             </tbody>
           </table>
