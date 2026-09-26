@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   BarChart3, CalendarDays, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight,
-  CircleDollarSign, Clock3, Download, Filter, MoreHorizontal, Plus, Search,
+  Clock3, Download, Filter, MoreHorizontal, Plus, Search,
   SlidersHorizontal, UserCheck, Users, X, XCircle
 } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
@@ -164,7 +164,9 @@ export function LeadsWorkspace(){
   const convertedCount=rows.filter(r=>stageLabel(r.stage)==="Converted").length;
   const lostCount=rows.filter(r=>["Lost","Rejected"].includes(stageLabel(r.stage))).length;
 
-  const loanTypes=Array.from(new Set(rows.map(r=>r.loanType).filter(Boolean)));
+  const loanTypes=Array.from(
+    new Set(rows.map(r=>r.loanType).filter((value): value is string => Boolean(value)))
+  );
   const sources=Array.from(new Set(rows.map(r=>r.source).filter(Boolean)));
   const employees=Array.from(new Set(rows.map(r=>r.assignedTo).filter(Boolean)));
 
