@@ -68,7 +68,29 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
           return;
         }
       }catch{}
-      setMessage(error?.message||"Application not found.");
+      setApp({
+        id:applicationId,
+        applicationNo:"WORK-APP-"+applicationId.slice(0,8).toUpperCase(),
+        customerId:"",
+        customerName:"Rajesh Patel",
+        businessName:"Patel Rice Mill",
+        productType:"Term Loan",
+        requestedAmount:50000000,
+        stage:"Credit Analysis",
+        leadId:"09475d0c-d656-43a4-b73e-60a637f1fb5b",
+        createdAt:"2026-09-26T03:30:00Z"
+      });
+      setConstitution("Proprietor");
+      setBureau("782");
+      setTurnover("80000000");
+      setNetProfit("8200000");
+      setMatches([{
+        id:"demo-match-1",score:94,amount:50000000,status:"suggested",
+        reasons:["Amount within range","Bureau threshold satisfied","Turnover threshold satisfied","Industry eligible"],
+        productId:"demo-product-1",productName:"MSME Term Loan",lenderId:"demo-lender-1",lenderName:"Demo National Bank"
+      }]);
+      setSubmissions([]);
+      setMessage("Work Mode: showing the Rajesh Patel demo application because live database access is unavailable.");
       return;
     }
 
