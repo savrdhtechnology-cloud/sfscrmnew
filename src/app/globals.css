@@ -879,3 +879,37 @@
 .customer-tab-card{min-height:300px}.customer-tab-card>h2{font-size:14px;margin-bottom:12px}.customer-financial-detail{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.customer-financial-detail>div{border:1px solid #e5eaee;border-radius:8px;padding:11px;display:grid}.customer-financial-detail span{font-size:9.5px;color:#748397}.customer-financial-detail strong{font-size:13px}.customer-match-list{display:grid;gap:8px}.customer-match-list>div{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;border:1px solid #e6ebef;border-radius:8px;padding:9px}.customer-match-list strong{font-size:10.5px}.customer-match-list span{display:block;font-size:9px;color:#7d8997}.customer-match-list b{font-size:10px;color:#277a52}.customer-communication{display:grid;place-items:center;align-content:center;min-height:220px;color:#7f8d9d}.customer-communication p{max-width:380px;text-align:center}
 @media(max-width:1350px){.customer-kpis{grid-template-columns:repeat(4,1fr)}.customers-workspace-grid{grid-template-columns:1fr}.customers-workspace-grid.has-preview{grid-template-columns:1fr 300px}.customer-summary-cards{grid-template-columns:repeat(3,1fr)}.customer-overview-grid{grid-template-columns:1fr 1fr}.customer-ai-panel,.customer-activity-panel,.customer-next-actions{grid-column:auto;grid-row:auto}.customer-apps-panel,.customer-docs-panel{grid-column:1/-1}.customer-identity-grid{grid-template-columns:1fr 1fr}.customer-identity-card{grid-column:1/-1}}
 @media(max-width:900px){.customer-filterbar{grid-template-columns:1fr 1fr}.customer-search{grid-column:1/-1}.customers-workspace-grid{grid-template-columns:1fr}.customer-preview{display:none}.customer-kpis{grid-template-columns:repeat(2,1fr)}.customer-identity-grid{grid-template-columns:1fr}.customer-business-card,.customer-rm-card{grid-column:auto}.customer-summary-cards{grid-template-columns:repeat(2,1fr)}.customer-overview-grid{grid-template-columns:1fr}.customer-apps-panel,.customer-docs-panel{grid-column:auto}.customer-doc-grid{grid-template-columns:repeat(3,1fr)}}
+
+
+/* Lead quick preview before 360° view */
+.lead-click-row{cursor:pointer}
+.lead-preview-link{border:0;background:transparent;padding:0;color:#213e69;font-weight:800;cursor:pointer;text-align:left}
+.lead-preview-link:hover{text-decoration:underline}
+.lead-row-actions .row-open{border:0;background:transparent;color:#9a6818;font-weight:800;cursor:pointer;padding:0}
+.lead-preview-backdrop{z-index:1200}
+.lead-preview-modal{
+  width:min(720px,calc(100vw - 28px));
+  max-height:calc(100vh - 40px);
+  overflow:auto;
+  background:#fff;
+  border:1px solid #e1e6eb;
+  border-radius:16px;
+  box-shadow:0 24px 70px rgba(15,23,42,.22);
+  padding:18px
+}
+.lead-preview-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid #edf0f3;padding-bottom:13px}
+.lead-preview-head h2{margin:7px 0 2px;font-size:24px;color:#17233a}
+.lead-preview-head p{margin:0!important;color:#66778b;font-size:11px!important}
+.lead-preview-head>button{width:34px;height:34px;border:1px solid #e1e6eb;background:#fff;border-radius:9px;display:grid;place-items:center;cursor:pointer}
+.lead-preview-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}
+.lead-preview-summary>div{border:1px solid #e7ebef;background:#fafcfd;border-radius:10px;padding:10px;display:grid;gap:3px}
+.lead-preview-summary span{font-size:9.5px;color:#788697}
+.lead-preview-summary strong{font-size:11.5px;color:#23364e;overflow-wrap:anywhere}
+.lead-preview-note{border:1px solid #ead9b3;background:#fff9ec;border-radius:10px;padding:11px;display:grid;gap:3px}
+.lead-preview-note strong{font-size:11px;color:#805b1b}
+.lead-preview-note span{font-size:10px;color:#6d624d;line-height:1.45}
+.lead-preview-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.lead-preview-actions button,.lead-360-button{height:38px;border-radius:8px;padding:0 13px;font-size:10.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+.lead-preview-actions button{border:1px solid #dfe5ea;background:#fff;color:#45576d}
+.lead-360-button{border:0;background:linear-gradient(135deg,#e6b64f,#b87915);color:#20190f;box-shadow:0 6px 14px rgba(177,119,25,.18)}
+@media(max-width:650px){.lead-preview-summary{grid-template-columns:1fr}.lead-preview-actions{display:grid;grid-template-columns:1fr 1fr}}
