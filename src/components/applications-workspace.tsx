@@ -10,7 +10,7 @@ import {
 import { CrmShell } from "@/components/crm-shell";
 import { supabase } from "@/lib/supabase";
 
-type ApplicationRow={
+export type ApplicationRow={
   id:string;
   createdAt:string;
   applicationNo:string;
@@ -25,7 +25,7 @@ type ApplicationRow={
 
 const STORAGE_KEY="savrdh-crm-applications";
 
-const DEMO_APPLICATIONS:ApplicationRow[]=[
+export const DEMO_APPLICATIONS:ApplicationRow[]=[
   {id:"a373183c-a174-4a6c-a31b-1641689fa404",createdAt:"2026-09-22T10:30:00Z",applicationNo:"APP20260922001",customer:"Rajesh Patel",product:"Term Loan",amount:"50000000",status:"In Process",stage:"Document Verification",source:"Partner",assignedTo:"Amit Sharma"},
   {id:"demo-app-2",createdAt:"2026-09-21T09:20:00Z",applicationNo:"APP20260921035",customer:"Neha Gupta",product:"Project Loan",amount:"10000000",status:"Approved",stage:"Sanctioned",source:"Website",assignedTo:"Rakesh Verma"},
   {id:"demo-app-3",createdAt:"2026-09-21T08:40:00Z",applicationNo:"APP20260921034",customer:"Suresh Jain",product:"Working Capital",amount:"7500000",status:"Under Review",stage:"Credit Appraisal",source:"Direct",assignedTo:"Pooja Singh"},
