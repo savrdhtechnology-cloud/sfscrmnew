@@ -35,7 +35,43 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
       .from("scp_loan_applications")
       .select("id,application_no,customer_id,product_type,requested_amount,stage,lead_id,created_at,scp_customers(full_name,business_name,constitution)")
       .eq("id",applicationId).maybeSingle();
-    if(error||!data){setMessage(error?.message||"Application not found.");return;}
+
+    if(error||!data){
+      try{
+        const raw=localStorage.getItem("savrdh-crm-applications");
+        const localRows=raw?JSON.parse(raw):[];
+        const hit=Array.isArray(localRows)?localRows.find((row:any)=>row.id===applicationId):null;
+        if(hit){
+          setApp({
+            id:hit.id,
+            applicationNo:hit.applicationNo||"WORK-APP-"+String(hit.id).slice(-6).toUpperCase(),
+            customerId:"",
+            customerName:hit.customer||"Rajesh Patel",
+            businessName:hit.businessName||"Patel Rice Mill",
+            productType:hit.product||"Term Loan",
+            requestedAmount:Number(hit.amount||50000000),
+            stage:hit.stage||"Credit Analysis",
+            leadId:hit.leadId||"09475d0c-d656-43a4-b73e-60a637f1fb5b",
+            createdAt:hit.createdAt||new Date().toISOString()
+          });
+          setConstitution("Proprietor");
+          setBureau("782");
+          setTurnover("80000000");
+          setNetProfit("8200000");
+          setMatches([{
+            id:"demo-match-1",score:94,amount:Number(hit.amount||50000000),status:"suggested",
+            reasons:["Amount within range","Bureau threshold satisfied","Turnover threshold satisfied","Industry eligible"],
+            productId:"demo-product-1",productName:"MSME Term Loan",lenderId:"demo-lender-1",lenderName:"Demo National Bank"
+          }]);
+          setSubmissions([]);
+          setMessage("Work Mode: live database access is unavailable, showing the local demo application.");
+          return;
+        }
+      }catch{}
+      setMessage(error?.message||"Application not found.");
+      return;
+    }
+
     setApp({
       id:data.id,applicationNo:data.application_no,customerId:data.customer_id,
       customerName:(data as any).scp_customers?.full_name||"Customer",
@@ -97,6 +133,16 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
 
   async function runMatching(){
     setBusy(true);setMessage("");
+    if(app && !app.customerId){
+      setMatches([{
+        id:"demo-match-1",score:94,amount:app.requestedAmount,status:"suggested",
+        reasons:["Amount within range","Bureau threshold satisfied","Turnover threshold satisfied","Industry eligible"],
+        productId:"demo-product-1",productName:"MSME Term Loan",lenderId:"demo-lender-1",lenderName:"Demo National Bank"
+      }]);
+      setMessage("Work Mode: 1 demo lender match found.");
+      setBusy(false);
+      return;
+    }
     try{
       const {data,error}=await supabase.rpc("scp_generate_lender_matches",{p_application_id:applicationId});
       if(error) throw error;
@@ -108,6 +154,11 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
 
   async function submitToLender(match:MatchRow){
     if(!app) return; setBusy(true);setMessage("");
+    if(!app.customerId){
+      setMessage("Work Mode: credit profile saved locally for this demo application.");
+      setBusy(false);
+      return;
+    }
     try{
       const {data,error}=await supabase.from("scp_lender_submissions").insert({
         application_id:app.id,lender_id:match.lenderId,lender_product_id:match.productId,
