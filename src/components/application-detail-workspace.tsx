@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
 import { supabase } from "@/lib/supabase";
+import { CreditIntelligencePanel } from "@/components/credit-intelligence-panel";
 
 type AppRow={
   id:string; applicationNo:string; customerId:string; customerName:string; businessName:string;
@@ -161,11 +162,22 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
         reasons:["Amount within range","Bureau threshold satisfied","Turnover threshold satisfied","Industry eligible"],
         productId:"demo-product-1",productName:"MSME Term Loan",lenderId:"demo-lender-1",lenderName:"Demo National Bank"
       }]);
-      setMessage("Work Mode: 1 demo lender match found.");
+      setMessage("Work Mode: Admin-approved demo lender match generated.");
       setBusy(false);
       return;
     }
     try{
+      const {data:decision,error:decisionError}=await supabase
+        .from("scp_credit_review_decisions")
+        .select("decision")
+        .eq("application_id",applicationId)
+        .order("decided_at",{ascending:false})
+        .limit(1)
+        .maybeSingle();
+      if(decisionError) throw decisionError;
+      if(decision?.decision!=="approved_for_matching"){
+        throw new Error("Manager/Owner approval is required before lender matching.");
+      }
       const {data,error}=await supabase.rpc("scp_generate_lender_matches",{p_application_id:applicationId});
       if(error) throw error;
       setMessage(Number(data||0)>0?data+" lender product match(es) found.":"No configured lender product currently matches this application.");
@@ -177,11 +189,31 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
   async function submitToLender(match:MatchRow){
     if(!app) return; setBusy(true);setMessage("");
     if(!app.customerId){
-      setMessage("Work Mode: credit profile saved locally for this demo application.");
+      const demoSubmission={
+        id:"demo-submission-"+Date.now(),
+        lenderName:match.lenderName,
+        status:"submitted",
+        submittedAt:new Date().toISOString(),
+        externalReference:"WORK-MODE-DEMO"
+      };
+      setSubmissions(prev=>[demoSubmission,...prev]);
+      setMatches(prev=>prev.map(m=>m.id===match.id?{...m,status:"selected"}:m));
+      setMessage("Work Mode: application submitted to "+match.lenderName+" after Admin approval.");
       setBusy(false);
       return;
     }
     try{
+      const {data:decision,error:decisionError}=await supabase
+        .from("scp_credit_review_decisions")
+        .select("decision")
+        .eq("application_id",app.id)
+        .order("decided_at",{ascending:false})
+        .limit(1)
+        .maybeSingle();
+      if(decisionError) throw decisionError;
+      if(decision?.decision!=="approved_for_matching"){
+        throw new Error("Manager/Owner approval is required before lender submission.");
+      }
       const {data,error}=await supabase.from("scp_lender_submissions").insert({
         application_id:app.id,lender_id:match.lenderId,lender_product_id:match.productId,
         submitted_amount:app.requestedAmount,status:"submitted",submitted_at:new Date().toISOString()
@@ -219,16 +251,12 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
 
       <div className="app-workflow-grid">
         <section className="app-main-column">
-          <article className="app-card">
-            <div className="app-card-head"><div><h2><TrendingUp size={17}/> Credit & Financial Analysis</h2><p>Save borrower metrics used by lender eligibility rules.</p></div></div>
-            <form className="credit-form" onSubmit={saveCredit}>
-              <label><span>Bureau Score</span><input type="number" min="0" max="1000" value={bureau} onChange={e=>setBureau(e.target.value)} placeholder="750"/></label>
-              <label><span>Annual Turnover (₹)</span><input type="number" value={turnover} onChange={e=>setTurnover(e.target.value)} placeholder="80000000"/></label>
-              <label><span>Net Profit (₹)</span><input type="number" value={netProfit} onChange={e=>setNetProfit(e.target.value)} placeholder="8000000"/></label>
-              <label><span>Constitution</span><select value={constitution} onChange={e=>setConstitution(e.target.value)}><option value="">Select</option><option>Individual</option><option>Proprietor</option><option>Partnership</option><option>LLP</option><option>Private Limited</option><option>Public Limited</option></select></label>
-              <button type="submit" disabled={busy}>Save Credit Profile</button>
-            </form>
-          </article>
+          <CreditIntelligencePanel
+            applicationId={app.id}
+            customerId={app.customerId}
+            requestedAmount={app.requestedAmount}
+            workMode={!app.customerId}
+          />
 
           <article className="app-card">
             <div className="app-card-head">
