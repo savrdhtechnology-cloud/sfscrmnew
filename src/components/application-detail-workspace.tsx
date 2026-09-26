@@ -157,12 +157,19 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
   async function runMatching(){
     setBusy(true);setMessage("");
     if(app && !app.customerId){
+      let approved=false;
+      try{approved=localStorage.getItem("savrdh-credit-decision-"+applicationId)==="approved_for_matching";}catch{}
+      if(!approved){
+        setMessage("Admin approval is required before lender matching.");
+        setBusy(false);
+        return;
+      }
       setMatches([{
         id:"demo-match-1",score:94,amount:app.requestedAmount,status:"suggested",
         reasons:["Amount within range","Bureau threshold satisfied","Turnover threshold satisfied","Industry eligible"],
         productId:"demo-product-1",productName:"MSME Term Loan",lenderId:"demo-lender-1",lenderName:"Demo National Bank"
       }]);
-      setMessage("Work Mode: Admin-approved demo lender match generated.");
+      setMessage("Work Mode: approved lender match generated.");
       setBusy(false);
       return;
     }
