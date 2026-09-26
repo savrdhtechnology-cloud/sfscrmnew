@@ -100,7 +100,7 @@ export function DocumentAiPanel({
 
   const stats=useMemo(()=>{
     const uploaded=items.filter(i=>i.documentId||i.status==="uploaded"||i.status==="verified").length;
-    const extracted=items.filter(i=>i.documentId&&extractions[i.documentId]?.status==="extracted").length;
+    const extracted=items.filter(i=>i.documentId&&extractions[i.documentId]?.status==="completed").length;
     const verified=items.filter(i=>i.documentId&&extractions[i.documentId]?.verified).length;
     return {uploaded,extracted,verified};
   },[items,extractions]);
@@ -114,7 +114,7 @@ export function DocumentAiPanel({
     try{
       if(workMode){
         const ext:Extraction={
-          documentId:item.documentId,status:"extracted",fields:demoFields(item.documentType),
+          documentId:item.documentId,status:"completed",fields:demoFields(item.documentType),
           notes:"Work Mode demo extraction. Human verification required.",verified:false
         };
         setExtractions(prev=>({...prev,[item.documentId!]:ext}));
@@ -154,14 +154,14 @@ export function DocumentAiPanel({
     setBusy(item.id);setMessage("");
     try{
       if(workMode){
-        setExtractions(prev=>({...prev,[item.documentId!]:{...ext,verified:true,status:"verified"}}));
+        setExtractions(prev=>({...prev,[item.documentId!]:{...ext,verified:true,status:"completed"}}));
         setMessage(item.label+" extraction verified in Work Mode.");
         return;
       }
       const {data:{user}}=await supabase.auth.getUser();
       if(!user) throw new Error("Sign in is required to verify extracted data.");
       const {error}=await supabase.from("scp_document_extractions").update({
-        extraction_status:"verified",
+        extraction_status:"completed",
         verified_by:user.id,
         verified_at:new Date().toISOString()
       }).eq("id",ext.id);
