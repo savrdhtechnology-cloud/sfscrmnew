@@ -73,6 +73,7 @@ export function LeadsWorkspace(){
   const [source,setSource]=useState("");
   const [employee,setEmployee]=useState("");
   const [open,setOpen]=useState(false);
+  const [selectedLead,setSelectedLead]=useState<LeadRow|null>(null);
   const [saved,setSaved]=useState(false);
   const [page,setPage]=useState(1);
   const pageSize=10;
@@ -270,10 +271,10 @@ export function LeadsWorkspace(){
             </tr></thead>
             <tbody>
               {visible.length===0?<tr><td colSpan={12}><div className="lead-empty">No leads match the selected filters.</div></td></tr>:
-              visible.map((row,index)=><tr key={row.id}>
-                <td><input type="checkbox"/></td>
+              visible.map((row,index)=><tr key={row.id} className="lead-click-row" onClick={()=>setSelectedLead(row)}>
+                <td><input type="checkbox" onClick={e=>e.stopPropagation()}/></td>
                 <td>{(safePage-1)*pageSize+index+1}</td>
-                <td className="lead-name"><Link href={"/crm/leads/"+row.id}>{row.name}</Link></td>
+                <td className="lead-name"><button type="button" className="lead-preview-link" onClick={e=>{e.stopPropagation();setSelectedLead(row)}}>{row.name}</button></td>
                 <td>{row.mobile||"—"}</td>
                 <td>{row.businessType||row.business||"—"}</td>
                 <td>{row.loanType||"—"}</td>
@@ -282,7 +283,10 @@ export function LeadsWorkspace(){
                 <td>{row.source||"—"}</td>
                 <td>{row.assignedTo||"Unassigned"}</td>
                 <td>{new Date(row.createdAt).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td>
-                <td><div className="lead-row-actions"><Link href={"/crm/leads/"+row.id}>Open</Link><button className="lead-more" onClick={()=>removeLead(row.id)} title="Delete lead"><MoreHorizontal size={17}/></button></div></td>
+                <td><div className="lead-row-actions">
+                  <button type="button" className="row-open" onClick={e=>{e.stopPropagation();setSelectedLead(row)}}>Open</button>
+                  <button className="lead-more" onClick={e=>{e.stopPropagation();removeLead(row.id)}} title="Delete lead"><MoreHorizontal size={17}/></button>
+                </div></td>
               </tr>)}
             </tbody>
           </table>
@@ -310,6 +314,40 @@ export function LeadsWorkspace(){
           </div>
         </article>
       </section>
+
+      {selectedLead&&<div className="lead-modal-backdrop lead-preview-backdrop" onMouseDown={()=>setSelectedLead(null)}>
+        <div className="lead-preview-modal" onMouseDown={e=>e.stopPropagation()}>
+          <div className="lead-preview-head">
+            <div>
+              <span className={stageClass(selectedLead.stage)}>{stageLabel(selectedLead.stage)}</span>
+              <h2>{selectedLead.name}</h2>
+              <p>{selectedLead.business||selectedLead.businessType||"Lead Profile"} · {selectedLead.loanType||"Loan requirement"}</p>
+            </div>
+            <button type="button" onClick={()=>setSelectedLead(null)}><X size={18}/></button>
+          </div>
+
+          <div className="lead-preview-summary">
+            <div><span>Mobile</span><strong>{selectedLead.mobile||"—"}</strong></div>
+            <div><span>Email</span><strong>{selectedLead.email||"—"}</strong></div>
+            <div><span>Business</span><strong>{selectedLead.business||"—"}</strong></div>
+            <div><span>Business Type</span><strong>{selectedLead.businessType||"—"}</strong></div>
+            <div><span>Loan Type</span><strong>{selectedLead.loanType||"—"}</strong></div>
+            <div><span>Loan Requirement</span><strong>{selectedLead.loanNeed?"₹ "+Number(selectedLead.loanNeed).toLocaleString("en-IN"):"—"}</strong></div>
+            <div><span>Source</span><strong>{selectedLead.source||"—"}</strong></div>
+            <div><span>Assigned To</span><strong>{selectedLead.assignedTo||"Unassigned"}</strong></div>
+          </div>
+
+          <div className="lead-preview-note">
+            <strong>Quick Preview</strong>
+            <span>Review the lead summary here. Open the 360° view only when you want to work on documents, follow-ups, AI analysis and application conversion.</span>
+          </div>
+
+          <div className="lead-preview-actions">
+            <button type="button" onClick={()=>setSelectedLead(null)}>Close</button>
+            <Link href={"/crm/leads/"+selectedLead.id} className="lead-360-button">Open 360° View →</Link>
+          </div>
+        </div>
+      </div>}
 
       {open&&<div className="lead-modal-backdrop" onMouseDown={()=>setOpen(false)}>
         <div className="lead-modal" onMouseDown={e=>e.stopPropagation()}>
