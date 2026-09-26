@@ -49,9 +49,20 @@ function mapDemo():LeadRow[]{
   return DEMO_LEADS.map((r,index)=>({
     ...r,
     email:(r as any).email||"",
-    businessType:["Rice Mill","Poultry Farming","Manufacturing","Solar Project","Trading"][index]||"Business",
-    loanType:["Term Loan","Project Loan","Working Capital","Business Loan","Equipment Finance"][index]||"Term Loan"
+    businessType:r.name==="Rajesh Patel"?"Rice Mill":(["Agro Processing","Poultry Farming","Manufacturing","Solar EPC","Wholesale Trading"][index]||"Business"),
+    loanType:r.name==="Rajesh Patel"?"Term Loan":(["Term Loan","Project Loan","Machinery Loan","Working Capital","Business Loan"][index]||"Term Loan")
   }));
+}
+
+function mergeLeads(...groups:LeadRow[][]):LeadRow[]{
+  const merged=new Map<string,LeadRow>();
+  for(const group of groups){
+    for(const row of group){
+      if(!merged.has(row.id)) merged.set(row.id,row);
+      else merged.set(row.id,{...merged.get(row.id)!,...row});
+    }
+  }
+  return Array.from(merged.values()).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime());
 }
 
 export function LeadsWorkspace(){
@@ -69,13 +80,22 @@ export function LeadsWorkspace(){
   useEffect(()=>{
     let active=true;
     (async()=>{
+      const demo=mapDemo();
+      let localRows:LeadRow[]=[];
+      try{
+        const local=localStorage.getItem(STORAGE_KEY);
+        const parsed=local?JSON.parse(local):[];
+        if(Array.isArray(parsed)) localRows=parsed;
+      }catch{}
+
+      let liveRows:LeadRow[]=[];
       try{
         const {data,error}=await supabase
           .from("scp_leads")
           .select("id,name,mobile,email,business_name,business_type,source,requested_amount,product_interest,stage,assigned_to,created_at")
           .order("created_at",{ascending:false});
-        if(!error && data && data.length){
-          if(active) setRows(data.map((r:any)=>({
+        if(!error && data){
+          liveRows=data.map((r:any)=>({
             id:r.id,
             createdAt:r.created_at,
             name:r.name||"",
@@ -88,17 +108,11 @@ export function LeadsWorkspace(){
             source:r.source||"Direct",
             assignedTo:r.assigned_to||"Unassigned",
             stage:r.stage||"new"
-          })));
-          return;
+          }));
         }
       }catch{}
-      try{
-        const local=localStorage.getItem(STORAGE_KEY);
-        if(local && active) setRows(JSON.parse(local));
-        else if(active) setRows(mapDemo());
-      }catch{
-        if(active) setRows(mapDemo());
-      }
+
+      if(active) setRows(mergeLeads(demo,localRows,liveRows));
     })();
     return ()=>{active=false};
   },[]);
