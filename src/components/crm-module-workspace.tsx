@@ -11,6 +11,7 @@ import type { ModuleDef } from "@/lib/crm-modules";
 import { CrmShell } from "@/components/crm-shell";
 import { supabase } from "@/lib/supabase";
 import { DEMO_LEADS } from "@/lib/demo-data";
+import { DEMO_APPLICATIONS } from "@/components/applications-workspace";
 
 type Row = Record<string,string> & { id:string; createdAt:string };
 
@@ -217,26 +218,93 @@ function EmptyModule({title}:{title:string}){
   return <div className="module-empty"><FileText size={24}/><strong>No {title.toLowerCase()} yet</strong><span>Create the first record using the action above.</span></div>;
 }
 
+function normalizePipelineStage(value:string){
+  const v=(value||"").toLowerCase().replaceAll("_"," ").trim();
+  if(v.includes("disbursed")) return "Disbursed";
+  if(v.includes("disbursement")) return "Disbursement Pending";
+  if(v.includes("sanction")||v==="approved") return "Sanctioned";
+  if(v.includes("bank assigned")||v.includes("lender matching")||v.includes("submitted")) return "Bank Assigned";
+  if(v.includes("credit")||v.includes("under review")||v.includes("appraisal")) return "Credit Analysis";
+  if(v.includes("document")||v.includes("kyc")||v.includes("awaiting")) return "KYC / Documents";
+  return "New Application";
+}
+
+function mergePipelineApps(...groups:Row[][]){
+  const map=new Map<string,Row>();
+  for(const group of groups){
+    for(const row of group) map.set(row.id,{...(map.get(row.id)||{}),...row});
+  }
+  return Array.from(map.values()).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime());
+}
+
 function PipelineBoard(){
-  const stages=["New Application","KYC / Documents","Credit Analysis","Bank Assigned","Sanctioned","Disbursement Pending"];
+  const stages=["New Application","KYC / Documents","Credit Analysis","Bank Assigned","Sanctioned","Disbursement Pending","Disbursed"];
   const [apps,setApps]=useState<Row[]>([]);
   useEffect(()=>{
-    const load=()=>{
+    let active=true;
+
+    const load=async()=>{
+      let localRows:Row[]=[];
       try{
         const raw=localStorage.getItem(storageKey("applications"));
-        setApps(raw?JSON.parse(raw):[]);
-      }catch{setApps([])}
+        const parsed=raw?JSON.parse(raw):[];
+        if(Array.isArray(parsed)) localRows=parsed;
+      }catch{}
+
+      const demoRows:Row[]=DEMO_APPLICATIONS.map(row=>({
+        id:row.id,createdAt:row.createdAt,applicationNo:row.applicationNo,
+        customer:row.customer,product:row.product,amount:row.amount,status:row.status,
+        stage:row.stage,source:row.source,assignedTo:row.assignedTo
+      }));
+
+      let liveRows:Row[]=[];
+      try{
+        const {data,error}=await supabase
+          .from("scp_loan_applications")
+          .select("id,application_no,product_type,requested_amount,stage,source_channel,created_at,scp_customers(full_name,business_name)")
+          .order("created_at",{ascending:false});
+        if(!error && data){
+          liveRows=(data as any[]).map((row:any)=>({
+            id:row.id,
+            createdAt:row.created_at,
+            applicationNo:row.application_no||"",
+            customer:row.scp_customers?.full_name||row.scp_customers?.business_name||"Customer",
+            product:row.product_type||"Business Loan",
+            amount:row.requested_amount?String(row.requested_amount):"",
+            status:"",
+            stage:row.stage||"new_application",
+            source:row.source_channel||"Direct",
+            assignedTo:"Unassigned"
+          }));
+        }
+      }catch{}
+
+      if(active) setApps(mergePipelineApps(demoRows,localRows,liveRows));
     };
+
     load();
-    window.addEventListener("savrdh-crm-update",load);
-    return ()=>window.removeEventListener("savrdh-crm-update",load);
+    const sync=()=>{void load();};
+    window.addEventListener("savrdh-crm-update",sync);
+    window.addEventListener("storage",sync);
+    return ()=>{
+      active=false;
+      window.removeEventListener("savrdh-crm-update",sync);
+      window.removeEventListener("storage",sync);
+    };
   },[]);
+
   return <div className="pipeline-board">{stages.map(stage=>{
-    const items=apps.filter(app=>(app.stage||"New Application")===stage);
+    const items=apps.filter(app=>normalizePipelineStage(app.stage||"")===stage);
     return <section className="pipeline-column" key={stage}>
       <header><span>{stage}</span><b>{items.length}</b></header>
       <div className="pipeline-dropzone">
-        {items.length===0?<><FileText size={18}/><small>No applications</small></>:items.map(item=><div className="pipeline-item" key={item.id}><strong>{item.customer||"Application"}</strong><span>{item.product||"Loan"}</span></div>)}
+        {items.length===0?<><FileText size={18}/><small>No applications</small></>:items.map(item=>
+          <Link href={"/crm/applications/"+item.id} className="pipeline-item" key={item.id}>
+            <strong>{item.customer||"Application"}</strong>
+            <span>{item.product||"Loan"}{item.amount?" · ₹ "+Number(item.amount).toLocaleString("en-IN"):""}</span>
+            <small>{item.applicationNo||normalizePipelineStage(item.stage||"")}</small>
+          </Link>
+        )}
       </div>
     </section>;
   })}</div>;
