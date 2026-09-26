@@ -36,6 +36,28 @@ export function CrmModuleWorkspace({
     let active=true;
     (async()=>{
       try{
+        if(definition.key==="applications"){
+          const {data,error}=await supabase
+            .from("scp_loan_applications")
+            .select("id,application_no,product_type,requested_amount,stage,created_at,scp_customers(full_name,business_name)")
+            .order("created_at",{ascending:false});
+          if(!error && data){
+            if(active) setRows((data as any[]).map((row:any)=>({
+              id:row.id,
+              createdAt:row.created_at,
+              customer:row.scp_customers?.full_name||row.scp_customers?.business_name||"Customer",
+              product:row.product_type||"",
+              amount:row.requested_amount?String(row.requested_amount):"",
+              stage:row.stage||"",
+              assignedTo:"—",
+              applicationNo:row.application_no||""
+            })));
+            return;
+          }
+          const raw=localStorage.getItem(storageKey(definition.key));
+          if(raw && active) setRows(JSON.parse(raw));
+          return;
+        }
         if(definition.key==="leads"){
           const {data,error}=await supabase
             .from("scp_leads")
@@ -163,7 +185,7 @@ export function CrmModuleWorkspace({
                     filtered.map(row=><tr key={row.id}>
                       {(definition.columns??[]).map(c=><td key={c.key}>{row[c.key]||"—"}</td>)}
                       <td>{new Date(row.createdAt).toLocaleDateString()}</td>
-                      <td><button type="button" className="row-delete" onClick={()=>removeRow(row.id)}>Delete</button></td>
+                      <td>{definition.key==="applications"?<Link className="row-open" href={"/crm/applications/"+row.id}>Open</Link>:<button type="button" className="row-delete" onClick={()=>removeRow(row.id)}>Delete</button>}</td>
                     </tr>)
                   }
                 </tbody>
