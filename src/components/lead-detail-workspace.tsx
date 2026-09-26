@@ -266,20 +266,76 @@ export function LeadDetailWorkspace({leadId}:{leadId:string}){
         if(error) throw error;
         setExistingApplication(String(data));
       }else{
+        const customerId="local-customer-"+lead.id;
+        const appId=crypto.randomUUID();
         const app={
-          id:crypto.randomUUID(),createdAt:new Date().toISOString(),customer:lead.name,
-          product:lead.productInterest,amount:String(lead.requestedAmount),
-          stage:"Credit Analysis",assignedTo:lead.assignedTo,source:lead.source,leadId:lead.id
+          id:appId,
+          applicationNo:"WORK-APP-"+appId.slice(0,8).toUpperCase(),
+          createdAt:new Date().toISOString(),
+          customerId,
+          customer:lead.name,
+          businessName:lead.businessName,
+          product:lead.productInterest,
+          amount:String(lead.requestedAmount),
+          status:"Under Review",
+          stage:"Credit Analysis",
+          assignedTo:lead.assignedTo,
+          source:lead.source,
+          leadId:lead.id
         };
-        const raw=localStorage.getItem(LOCAL_APPS);
-        const apps=raw?JSON.parse(raw):[];
-        localStorage.setItem(LOCAL_APPS,JSON.stringify([app,...apps]));
-        setExistingApplication(app.id);
+
+        const rawApps=localStorage.getItem(LOCAL_APPS);
+        const apps=rawApps?JSON.parse(rawApps):[];
+        localStorage.setItem(LOCAL_APPS,JSON.stringify([app,...apps.filter((x:any)=>x.leadId!==lead.id)]));
+
+        const customer={
+          id:customerId,
+          createdAt:new Date().toISOString(),
+          name:lead.name,
+          fullName:lead.name,
+          business:lead.businessName,
+          mobile:lead.mobile,
+          email:lead.email,
+          constitution:"Proprietor",
+          source:lead.source,
+          status:"active",
+          leadId:lead.id,
+          applicationId:appId
+        };
+        try{
+          const rawCustomers=localStorage.getItem("savrdh-crm-customers");
+          const customers=rawCustomers?JSON.parse(rawCustomers):[];
+          localStorage.setItem("savrdh-crm-customers",JSON.stringify([customer,...customers.filter((x:any)=>x.leadId!==lead.id)]));
+        }catch{}
+
         try{
           const rawLeads=localStorage.getItem(LOCAL_LEADS);
           const leads=rawLeads?JSON.parse(rawLeads):[];
-          localStorage.setItem(LOCAL_LEADS,JSON.stringify(leads.map((x:any)=>x.id===lead.id?{...x,stage:"converted"}:x)));
+          localStorage.setItem(LOCAL_LEADS,JSON.stringify(leads.map((x:any)=>x.id===lead.id?{
+            ...x,stage:"converted",customerId,applicationId:appId
+          }:x)));
         }catch{}
+
+        try{
+          const localDocs=checklist.filter(x=>x.documentId).map(x=>({
+            id:x.documentId,
+            createdAt:new Date().toISOString(),
+            owner:lead.name,
+            leadId:lead.id,
+            customerId,
+            applicationId:appId,
+            documentType:x.label,
+            fileName:x.label,
+            status:x.status
+          }));
+          const rawDocs=localStorage.getItem("savrdh-crm-documents");
+          const docs=rawDocs?JSON.parse(rawDocs):[];
+          const otherDocs=docs.filter((x:any)=>x.leadId!==lead.id);
+          localStorage.setItem("savrdh-crm-documents",JSON.stringify([...localDocs,...otherDocs]));
+        }catch{}
+
+        window.dispatchEvent(new Event("savrdh-crm-update"));
+        setExistingApplication(app.id);
       }
       setMessage("Lead converted successfully. Application moved to Credit Analysis.");
       setTimeout(()=>router.push("/crm/applications"),700);
