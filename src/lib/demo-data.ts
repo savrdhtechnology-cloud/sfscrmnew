@@ -4,4 +4,6 @@ export const DEMO_LEADS = [
   {id:"demo-3",createdAt:"2026-09-25T09:02:00Z",name:"Sunil Yadav",mobile:"9876501003",email:"sunil.yadav.demo@example.com",business:"Yadav Engineering Works",loanNeed:"25000000",source:"Dummy Test",assignedTo:"Unassigned",stage:"qualified"},
   {id:"demo-4",createdAt:"2026-09-25T09:03:00Z",name:"Neha Gupta",mobile:"9876501004",email:"neha.gupta.demo@example.com",business:"Gupta Solar Solutions",loanNeed:"10000000",source:"Dummy Test",assignedTo:"Unassigned",stage:"new"},
   {id:"demo-5",createdAt:"2026-09-25T09:04:00Z",name:"Manoj Mishra",mobile:"9876501005",email:"manoj.mishra.demo@example.com",business:"Mishra Traders",loanNeed:"7500000",source:"Dummy Test",assignedTo:"Unassigned",stage:"contacted"}
+,
+  {id:"09475d0c-d656-43a4-b73e-60a637f1fb5b",createdAt:"2026-09-26T03:21:58Z",name:"Rajesh Patel",mobile:"9000000099",email:"rajesh.demo@example.test",business:"Patel Rice Mill",loanNeed:"50000000",source:"Dummy Full Case",assignedTo:"Amit Sharma",stage:"qualified"}
 ] as const;
