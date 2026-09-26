@@ -46,6 +46,12 @@ export function CreditIntelligencePanel({
   const [busy,setBusy]=useState(false);
 
   useEffect(()=>{
+    if(workMode){
+      try{
+        const saved=localStorage.getItem("savrdh-credit-decision-"+applicationId);
+        if(saved) setDecision(saved);
+      }catch{}
+    }
     (async()=>{
       try{
         const {data:checklist}=await supabase
@@ -295,7 +301,11 @@ export function CreditIntelligencePanel({
     try{
       if(workMode){
         setDecision("approved_for_matching");
-        setMessage("Work Mode: approved for lender matching by Admin.");
+        try{
+          localStorage.setItem("savrdh-credit-decision-"+applicationId,"approved_for_matching");
+          localStorage.setItem("savrdh-credit-decision-notes-"+applicationId,decisionNotes||"Approved by Admin in Work Mode.");
+        }catch{}
+        setMessage("Work Mode: Admin approval recorded. Lender matching is now enabled.");
         setBusy(false);return;
       }
       const {data:{user}}=await supabase.auth.getUser();
