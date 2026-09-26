@@ -260,7 +260,7 @@ export function CustomersWorkspace(){
         ].map(([label,count])=><button key={String(label)} onClick={()=>label==="All"?setStatus(""):setStatus(String(label==="Application Created"?"":label==="KYC Pending"?"":label))}><span>{label}</span><b>{count}</b></button>)}
       </section>
 
-      <section className="customers-workspace-grid">
+      <section className={"customers-workspace-grid"+(selected?" has-preview":"")}>
         <article className="customers-table-card">
           <div className="customers-table-tools"><div><button className="active"><List size={14}/></button><button><Grid2X2 size={14}/></button></div><span>Showing {filtered.length} customers</span></div>
           <div className="customers-table-wrap">
@@ -285,9 +285,9 @@ export function CustomersWorkspace(){
           </div>
         </article>
 
-        <aside className={"customer-preview"+(selected?" open":"")}>
-          {selected?<CustomerPreview customer={selected}/>:<div className="customer-preview-empty"><UserRound size={28}/><strong>Select a customer</strong><span>Customer profile summary will appear here.</span></div>}
-        </aside>
+        {selected&&<aside className="customer-preview open">
+          <CustomerPreview customer={selected}/>
+        </aside>}
       </section>
 
       {open&&<div className="module-modal-backdrop" onMouseDown={()=>setOpen(false)}>
