@@ -1,3 +1,5 @@
+const APPLICATIONS_DEPLOY_MARKER = "premium-applications-v2";
+void APPLICATIONS_DEPLOY_MARKER;
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
