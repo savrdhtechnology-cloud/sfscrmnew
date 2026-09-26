@@ -256,6 +256,14 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
         <article><Landmark size={20}/><span>Lender Submissions</span><strong>{submissions.length}</strong></article>
       </section>
 
+      <section className="ai-engine-strip">
+        <div><b>1</b><span>Lead AI</span><i/></div>
+        <div><b>2</b><span>Document AI</span><i/></div>
+        <div><b>3</b><span>Credit AI</span><i/></div>
+        <div><b>4</b><span>Human Approval</span><i/></div>
+        <div><b>5</b><span>Lender Workflow</span><i/></div>
+      </section>
+
       <div className="app-workflow-grid">
         <section className="app-main-column">
           <CreditIntelligencePanel
