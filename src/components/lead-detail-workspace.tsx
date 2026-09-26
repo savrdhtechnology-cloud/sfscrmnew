@@ -9,6 +9,8 @@ import {
   NotebookPen, Phone, Plus, Send, UploadCloud, UserRound, Users, XCircle
 } from "lucide-react";
 import { CrmShell } from "@/components/crm-shell";
+import { LeadAiPanel } from "@/components/lead-ai-panel";
+import { DocumentAiPanel } from "@/components/document-ai-panel";
 import { DEMO_LEADS } from "@/lib/demo-data";
 import { supabase } from "@/lib/supabase";
 
@@ -332,7 +334,16 @@ export function LeadDetailWorkspace({leadId}:{leadId:string}){
             ].map(([key,label])=><button key={key} className={tab===key?"active":""} onClick={()=>setTab(key)}>{label}</button>)}
           </nav>
 
-          {tab==="overview"&&<div className="lead-overview-grid">
+          {tab==="overview"&&<>
+          <LeadAiPanel
+            lead={{
+              id:lead.id,name:lead.name,businessName:lead.businessName,businessType:lead.businessType,
+              source:lead.source,requestedAmount:lead.requestedAmount,productInterest:lead.productInterest,
+              mobile:lead.mobile,email:lead.email
+            }}
+            workMode={localMode}
+          />
+          <div className="lead-overview-grid">
             <article className="lead-info-card">
               <h2><UserRound size={16}/> Customer Information</h2>
               <dl><dt>Full Name</dt><dd>{lead.name}</dd><dt>Mobile Number</dt><dd>{lead.mobile||"—"}</dd><dt>Email Address</dt><dd>{lead.email||"—"}</dd><dt>Source</dt><dd>{lead.source}</dd></dl>
@@ -351,7 +362,8 @@ export function LeadDetailWorkspace({leadId}:{leadId:string}){
               <div className="readiness-row"><span>Application</span><strong>{existingApplication?"Created":"Not created"}</strong></div>
               <button className="lead-card-action" onClick={()=>setTab("documents")}>Review document checklist</button>
             </article>
-          </div>}
+          </div>
+          </>}
 
           {tab==="documents"&&<div className="lead-doc-workspace">
             <div className="lead-section-head"><div><h2>Document Collection & Verification</h2><p>Required documents must be verified before application conversion.</p></div><strong>{verifiedCount}/{checklist.filter(x=>x.required).length} required verified</strong></div>
@@ -364,6 +376,12 @@ export function LeadDetailWorkspace({leadId}:{leadId:string}){
               </div>)}
             </div>
             <div className={requiredComplete?"doc-gate ready":"doc-gate"}><FileCheck2 size={18}/><div><strong>{requiredComplete?"Ready for Application":"Application conversion locked"}</strong><span>{requiredComplete?"All required documents are verified.":"Verify every required document to enable conversion."}</span></div></div>
+            <DocumentAiPanel
+              applicationId={existingApplication}
+              leadId={lead.id}
+              items={checklist}
+              workMode={localMode}
+            />
           </div>}
 
           {tab==="tasks"&&<div className="lead-two-column">
