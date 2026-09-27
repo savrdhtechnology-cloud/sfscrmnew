@@ -20,6 +20,12 @@ type MatchRow={
 };
 type Submission={id:string;lenderName:string;status:string;submittedAt:string|null;externalReference:string|null};
 
+function displayApplicationNo(value:string|undefined|null,id:string){
+  const current=(value||"").trim();
+  if(current && !current.startsWith("WORK-") && !current.startsWith("WORK_")) return current;
+  return "APP"+new Date().toISOString().slice(0,10).replaceAll("-","")+id.replaceAll("-","").slice(0,5).toUpperCase();
+}
+
 export function ApplicationDetailWorkspace({applicationId}:{applicationId:string}){
   const [app,setApp]=useState<AppRow|null>(null);
   const [matches,setMatches]=useState<MatchRow[]>([]);
@@ -45,7 +51,7 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
         if(hit){
           setApp({
             id:hit.id,
-            applicationNo:hit.applicationNo||"WORK-APP-"+String(hit.id).slice(-6).toUpperCase(),
+            applicationNo:displayApplicationNo(hit.applicationNo||hit.application_no,hit.id),
             customerId:"",
             customerName:hit.customer||"Rajesh Patel",
             businessName:hit.businessName||"Patel Rice Mill",
@@ -71,7 +77,7 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
       }catch{}
       setApp({
         id:applicationId,
-        applicationNo:"WORK-APP-"+applicationId.slice(0,8).toUpperCase(),
+        applicationNo:displayApplicationNo(null,applicationId),
         customerId:"",
         customerName:"Rajesh Patel",
         businessName:"Patel Rice Mill",
@@ -96,7 +102,7 @@ export function ApplicationDetailWorkspace({applicationId}:{applicationId:string
     }
 
     setApp({
-      id:data.id,applicationNo:data.application_no,customerId:data.customer_id,
+      id:data.id,applicationNo:displayApplicationNo(data.application_no,data.id),customerId:data.customer_id,
       customerName:(data as any).scp_customers?.full_name||"Customer",
       businessName:(data as any).scp_customers?.business_name||"",
       productType:data.product_type,requestedAmount:Number(data.requested_amount||0),
