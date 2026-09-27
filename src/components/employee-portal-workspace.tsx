@@ -109,8 +109,17 @@ export function EmployeePortalWorkspace(){
       setView(HASH_TO_VIEW[window.location.hash]||"dashboard");
     };
     const sync=()=>void load();
-    window.addEventListener("hashchange",hash);window.addEventListener("savrdh-crm-update",sync);hash();
-    return()=>{window.removeEventListener("hashchange",hash);window.removeEventListener("savrdh-crm-update",sync)};
+    window.addEventListener("hashchange",hash);
+    window.addEventListener("savrdh-portal-nav",hash as EventListener);
+    window.addEventListener("popstate",hash);
+    window.addEventListener("savrdh-crm-update",sync);
+    hash();
+    return()=>{
+      window.removeEventListener("hashchange",hash);
+      window.removeEventListener("savrdh-portal-nav",hash as EventListener);
+      window.removeEventListener("popstate",hash);
+      window.removeEventListener("savrdh-crm-update",sync);
+    };
   },[]);
 
   const stats=useMemo(()=>({
