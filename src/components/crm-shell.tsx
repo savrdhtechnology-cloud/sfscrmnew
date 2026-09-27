@@ -106,6 +106,7 @@ export function CrmShell({
 }) {
   const [notificationOpen,setNotificationOpen]=useState(false);
   const [notifications,setNotifications]=useState<any[]>([]);
+  const [activeNav,setActiveNav]=useState(active);
 
   useEffect(()=>{
     let active=true;
@@ -142,8 +143,39 @@ export function CrmShell({
     return()=>{active=false;window.removeEventListener("savrdh-notification-update",sync);window.removeEventListener("savrdh-crm-update",sync)};
   },[]);
 
+  useEffect(()=>{ setActiveNav(active); },[active]);
+
   const unread=notifications.filter(n=>!n.read).length;
   const nav=roleNav[role]||ownerNav;
+
+  function handlePortalNav(e:any,href:string,label:string){
+    if(typeof window==="undefined") return;
+    if(!href.startsWith("/portal/")) return;
+
+    const target=new URL(href,window.location.origin);
+    const currentPath=window.location.pathname;
+    const isSamePortal=currentPath===target.pathname;
+
+    if(!isSamePortal) return;
+
+    e.preventDefault();
+    const nextUrl=target.pathname+target.search+target.hash;
+    window.history.pushState({savrdhPortalNav:true},"",nextUrl);
+    setActiveNav(label);
+
+    window.dispatchEvent(new CustomEvent("savrdh-portal-nav",{
+      detail:{role,label,href:nextUrl,hash:target.hash}
+    }));
+
+    if(target.hash){
+      requestAnimationFrame(()=>{
+        const el=document.getElementById(target.hash.slice(1));
+        if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+      });
+    }else{
+      window.scrollTo({top:0,behavior:"smooth"});
+    }
+  }
 
   async function markRead(n:any){
     if(n.live){
@@ -174,7 +206,7 @@ export function CrmShell({
 
         <nav className="lux-nav">
           {nav.map(({label,href,icon:Icon})=>(
-            <Link key={label} href={href} className={`lux-nav-item ${active===label?"active":""}`}>
+            <Link key={label} href={href} onClick={(e)=>handlePortalNav(e,href,label)} className={`lux-nav-item ${activeNav===label?"active":""}`}>
               <Icon size={18}/>
               <span>{label}</span>
             </Link>
@@ -204,7 +236,7 @@ export function CrmShell({
           </div>
 
           <div className="lux-top-actions">
-            <Link href={role==="partner"?"/portal/partner#support":"/crm/communications"} className="lux-whatsapp"><MessageCircle size={18}/> {role==="partner"?"WhatsApp Support":"WhatsApp"}</Link>
+            <Link href={role==="partner"?"/portal/partner#support":"/crm/communications"} onClick={(e)=>role==="partner"&&handlePortalNav(e,"/portal/partner#support","Support")} className="lux-whatsapp"><MessageCircle size={18}/> {role==="partner"?"WhatsApp Support":"WhatsApp"}</Link>
             <div className="lux-notification-wrap">
               <button type="button" className="lux-bell" onClick={()=>setNotificationOpen(v=>!v)} aria-label="Notifications">
                 <Bell size={18}/>{unread>0&&<span>{unread}</span>}
