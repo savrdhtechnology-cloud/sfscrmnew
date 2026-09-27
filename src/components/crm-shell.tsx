@@ -35,10 +35,15 @@ const roleNav:Record<string,typeof ownerNav> = {
   ],
   partner:[
     {label:"Dashboard",href:"/portal/partner",icon:LayoutDashboard},
-    {label:"Referrals",href:"/portal/partner#referrals",icon:UserRoundPlus},
-    {label:"Applications",href:"/portal/partner#applications",icon:FileText},
-    {label:"Documents",href:"/portal/partner#documents",icon:FolderOpen},
-    {label:"Commission",href:"/portal/partner#commission",icon:ReceiptIndianRupee}
+    {label:"Add New Lead",href:"/portal/partner#add",icon:UserRoundPlus},
+    {label:"My Leads",href:"/portal/partner#leads",icon:Users},
+    {label:"My Customers",href:"/portal/partner#customers",icon:Users},
+    {label:"My Commissions",href:"/portal/partner#commissions",icon:ReceiptIndianRupee},
+    {label:"Payouts",href:"/portal/partner#payouts",icon:WalletCards},
+    {label:"Marketing Tools",href:"/portal/partner#marketing",icon:BarChart3},
+    {label:"Resources",href:"/portal/partner#resources",icon:FolderOpen},
+    {label:"Support",href:"/portal/partner#support",icon:Headphones},
+    {label:"My Profile",href:"/portal/partner#profile",icon:Users}
   ],
   employee:[
     {label:"Dashboard",href:"/portal/employee",icon:LayoutDashboard},
@@ -85,11 +90,15 @@ const roleNav:Record<string,typeof ownerNav> = {
 export function CrmShell({
   children,
   active="Dashboard",
-  role="owner"
+  role="owner",
+  profileName,
+  profileSubtitle
 }:{
   children:ReactNode;
   active?:string;
   role?:string;
+  profileName?:string;
+  profileSubtitle?:string;
 }) {
   const [notificationOpen,setNotificationOpen]=useState(false);
   const [notifications,setNotifications]=useState<any[]>([]);
@@ -100,7 +109,11 @@ export function CrmShell({
       let local:any[]=[];
       try{
         const raw=localStorage.getItem("savrdh-crm-notifications");
-        local=raw?JSON.parse(raw):[];
+        const parsed=raw?JSON.parse(raw):[];
+        local=Array.isArray(parsed)?parsed.filter((n:any)=>{
+          if(role==="owner") return !n.audience || n.audience==="owner" || n.audience==="manager";
+          return n.audience===role;
+        }):[];
       }catch{}
       let live:any[]=[];
       try{
@@ -187,7 +200,7 @@ export function CrmShell({
           </div>
 
           <div className="lux-top-actions">
-            <Link href="/crm/communications" className="lux-whatsapp"><MessageCircle size={18}/> WhatsApp</Link>
+            <Link href={role==="partner"?"/portal/partner#support":"/crm/communications"} className="lux-whatsapp"><MessageCircle size={18}/> {role==="partner"?"WhatsApp Support":"WhatsApp"}</Link>
             <div className="lux-notification-wrap">
               <button type="button" className="lux-bell" onClick={()=>setNotificationOpen(v=>!v)} aria-label="Notifications">
                 <Bell size={18}/>{unread>0&&<span>{unread}</span>}
@@ -203,10 +216,10 @@ export function CrmShell({
               </div>}
             </div>
             <div className="lux-profile">
-              <div className="lux-profile-avatar">SF</div>
+              <div className="lux-profile-avatar">{(profileName||"Savrdh User").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase()}</div>
               <div>
-                <strong>Savrdh User</strong>
-                <span>{role.charAt(0).toUpperCase()+role.slice(1)} Portal</span>
+                <strong>{profileName||"Savrdh User"}</strong>
+                <span>{profileSubtitle||role.charAt(0).toUpperCase()+role.slice(1)+" Portal"}</span>
               </div>
               <ChevronDown size={15}/>
             </div>
