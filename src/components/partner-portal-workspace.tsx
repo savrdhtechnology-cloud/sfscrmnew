@@ -147,9 +147,18 @@ export function PartnerPortalWorkspace(){
   useEffect(()=>{
     void load();
     const sync=()=>void load();
+    const hashAction=()=>{
+      if(window.location.hash==="#add") setOpen(true);
+    };
     window.addEventListener("savrdh-crm-update",sync);
     window.addEventListener("storage",sync);
-    return()=>{window.removeEventListener("savrdh-crm-update",sync);window.removeEventListener("storage",sync)};
+    window.addEventListener("hashchange",hashAction);
+    hashAction();
+    return()=>{
+      window.removeEventListener("savrdh-crm-update",sync);
+      window.removeEventListener("storage",sync);
+      window.removeEventListener("hashchange",hashAction);
+    };
   },[]);
 
   const stats=useMemo(()=>{
