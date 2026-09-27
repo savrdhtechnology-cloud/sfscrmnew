@@ -38,6 +38,13 @@ export const DEMO_APPLICATIONS:ApplicationRow[]=[
   {id:"demo-app-10",createdAt:"2026-09-15T13:10:00Z",applicationNo:"APP20260915005",customer:"Deepak Sharma",product:"Business Loan",amount:"15000000",status:"Disbursed",stage:"Disbursed",source:"Direct",assignedTo:"Rakesh Verma"}
 ];
 
+function displayApplicationNo(value:string|undefined|null,id:string,createdAt?:string){
+  const current=(value||"").trim();
+  if(current && !current.startsWith("WORK-") && !current.startsWith("WORK_")) return current;
+  const date=new Date(createdAt||Date.now()).toISOString().slice(0,10).replaceAll("-","");
+  return "APP"+date+String(id).replaceAll("-","").slice(0,5).toUpperCase();
+}
+
 function normalizeStage(value:string){
   const v=(value||"").toLowerCase().replaceAll("_"," ");
   if(v.includes("disbursed")) return "Disbursed";
@@ -89,7 +96,7 @@ export function ApplicationsWorkspace(){
         const parsed=raw?JSON.parse(raw):[];
         if(Array.isArray(parsed)) localRows=parsed.map((r:any)=>({
           id:r.id,createdAt:r.createdAt||new Date().toISOString(),
-          applicationNo:r.applicationNo||r.application_no||"WORK-"+String(r.id).slice(-6).toUpperCase(),
+          applicationNo:displayApplicationNo(r.applicationNo||r.application_no,r.id,r.createdAt),
           customer:r.customer||"Customer",product:r.product||"Business Loan",amount:String(r.amount||""),
           status:r.status||normalizeStatus(r.stage||""),stage:r.stage||"Received",
           source:r.source||"Direct",assignedTo:r.assignedTo||"Unassigned"
