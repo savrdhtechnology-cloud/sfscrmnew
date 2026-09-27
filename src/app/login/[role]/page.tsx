@@ -6,6 +6,7 @@ import {
   Users, WalletCards
 } from "lucide-react";
 import { ROLES, type Role } from "@/lib/rbac";
+import { LiveLogin } from "@/components/live-login";
 
 const meta:Record<Role,{title:string;subtitle:string;icon:any;active:string}>={
   customer:{title:"Customer Portal",subtitle:"Applications, documents, offers and loan status.",icon:Users,active:"Customer access"},
@@ -55,26 +56,10 @@ export default async function LoginPage({params}:{params:Promise<{role:string}>}
             <p>Enter your authorised credentials to continue to the {item.title.toLowerCase()}.</p>
           </div>
 
-          <form className="login-form">
-            <label>
-              <span>Email / User ID</span>
-              <div className="input-wrap"><Mail size={17}/><input type="text" placeholder="Enter registered email or user ID"/></div>
-            </label>
-            <label>
-              <span>Password</span>
-              <div className="input-wrap"><LockKeyhole size={17}/><input type="password" placeholder="Enter password"/><Eye size={16}/></div>
-            </label>
-            <div className="login-options">
-              <label className="remember"><input type="checkbox"/> <span>Remember this device</span></label>
-              <button type="button" className="text-button">Forgot password?</button>
-            </div>
-            <button type="button" className="login-submit" disabled>
-              Secure Sign In <ArrowRight size={16}/>
-            </button>
-          </form>
+          <LiveLogin role={typedRole}/>
 
           <div className="login-preview-note">
-            Authentication activates with the Cloudflare D1 user store.
+            Sign in with an account authorised for this portal role.
             <Link href={`/portal/${typedRole}`}> Preview workspace <ArrowRight size={13}/></Link>
           </div>
           <div className="login-security"><ShieldCheck size={15}/> Finance-controlled workflow · Audit enabled</div>
