@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, Users, UserRoundPlus, FileText, BadgeIndianRupee, Landmark,
   WalletCards, Handshake, BarChart3, FolderOpen, Settings, Bell, Search,
   ChevronDown, ShieldCheck, ListChecks, ReceiptIndianRupee, Headphones,
   MessageCircle, CalendarDays, Sun, Moon
 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 const nav = [
   { label:"Dashboard", href:"/portal/owner", icon:LayoutDashboard },
@@ -32,6 +34,56 @@ export function CrmShell({
   active?:string;
   role?:string;
 }) {
+  const [notificationOpen,setNotificationOpen]=useState(false);
+  const [notifications,setNotifications]=useState<any[]>([]);
+
+  useEffect(()=>{
+    let active=true;
+    const load=async()=>{
+      let local:any[]=[];
+      try{
+        const raw=localStorage.getItem("savrdh-crm-notifications");
+        local=raw?JSON.parse(raw):[];
+      }catch{}
+      let live:any[]=[];
+      try{
+        const {data}=await supabase.from("scp_notifications")
+          .select("id,title,body,type,entity_type,entity_id,read_at,created_at")
+          .order("created_at",{ascending:false}).limit(12);
+        if(data) live=(data as any[]).map(n=>({
+          id:n.id,title:n.title,body:n.body||"",entityType:n.entity_type,entityId:n.entity_id,
+          createdAt:n.created_at,read:Boolean(n.read_at),live:true
+        }));
+      }catch{}
+      if(active){
+        const map=new Map<string,any>();
+        [...live,...local].forEach(n=>map.set(n.id,n));
+        setNotifications(Array.from(map.values()).sort((a,b)=>new Date(b.createdAt).getTime()-new Date(a.createdAt).getTime()).slice(0,12));
+      }
+    };
+    void load();
+    const sync=()=>{void load();};
+    window.addEventListener("savrdh-notification-update",sync);
+    window.addEventListener("savrdh-crm-update",sync);
+    return()=>{active=false;window.removeEventListener("savrdh-notification-update",sync);window.removeEventListener("savrdh-crm-update",sync)};
+  },[]);
+
+  const unread=notifications.filter(n=>!n.read).length;
+
+  async function markRead(n:any){
+    if(n.live){
+      try{await supabase.from("scp_notifications").update({read_at:new Date().toISOString()}).eq("id",n.id);}catch{}
+    }else{
+      try{
+        const raw=localStorage.getItem("savrdh-crm-notifications");const rows=raw?JSON.parse(raw):[];
+        localStorage.setItem("savrdh-crm-notifications",JSON.stringify(rows.map((x:any)=>x.id===n.id?{...x,read:true}:x)));
+      }catch{}
+    }
+    setNotifications(prev=>prev.map(x=>x.id===n.id?{...x,read:true}:x));
+    if(n.entityType==="lead"&&n.entityId) window.location.href="/crm/leads/"+n.entityId;
+    else if(n.entityType==="application"&&n.entityId) window.location.href="/crm/applications/"+n.entityId;
+  }
+
   return (
     <div className="lux-crm-shell">
       <aside className="lux-sidebar">
@@ -78,7 +130,20 @@ export function CrmShell({
 
           <div className="lux-top-actions">
             <Link href="/crm/communications" className="lux-whatsapp"><MessageCircle size={18}/> WhatsApp</Link>
-            <Link href="/crm/notifications" className="lux-bell"><Bell size={18}/><span>3</span></Link>
+            <div className="lux-notification-wrap">
+              <button type="button" className="lux-bell" onClick={()=>setNotificationOpen(v=>!v)} aria-label="Notifications">
+                <Bell size={18}/>{unread>0&&<span>{unread}</span>}
+              </button>
+              {notificationOpen&&<div className="lux-notification-menu">
+                <div className="lux-notification-head"><strong>Notifications</strong><Link href="/crm/notifications" onClick={()=>setNotificationOpen(false)}>View all</Link></div>
+                <div className="lux-notification-list">
+                  {notifications.length?notifications.map(n=><button type="button" key={n.id} className={n.read?"read":""} onClick={()=>markRead(n)}>
+                    <i/>
+                    <div><strong>{n.title}</strong><span>{n.body}</span><small>{new Date(n.createdAt).toLocaleString("en-IN")}</small></div>
+                  </button>):<div className="lux-notification-empty">No notifications yet.</div>}
+                </div>
+              </div>}
+            </div>
             <div className="lux-profile">
               <div className="lux-profile-avatar">SF</div>
               <div>
