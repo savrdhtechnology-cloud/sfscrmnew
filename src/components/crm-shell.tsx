@@ -47,11 +47,15 @@ const roleNav:Record<string,typeof ownerNav> = {
   ],
   employee:[
     {label:"Dashboard",href:"/portal/employee",icon:LayoutDashboard},
-    {label:"Assigned Leads",href:"/portal/employee#leads",icon:UserRoundPlus},
-    {label:"Applications",href:"/portal/employee#applications",icon:FileText},
+    {label:"My Leads",href:"/portal/employee#leads",icon:Users},
+    {label:"Add New Lead",href:"/portal/employee#add",icon:UserRoundPlus},
+    {label:"My Applications",href:"/portal/employee#applications",icon:FileText},
     {label:"Follow-ups",href:"/portal/employee#followups",icon:ListChecks},
-    {label:"Documents",href:"/portal/employee#documents",icon:FolderOpen},
-    {label:"Tasks",href:"/portal/employee#tasks",icon:CheckCircle2}
+    {label:"Customers",href:"/portal/employee#customers",icon:Users},
+    {label:"Tasks",href:"/portal/employee#tasks",icon:CheckCircle2},
+    {label:"Reports",href:"/portal/employee#reports",icon:BarChart3},
+    {label:"Knowledge Base",href:"/portal/employee#knowledge",icon:FolderOpen},
+    {label:"Support",href:"/portal/employee#support",icon:Headphones}
   ],
   credit:[
     {label:"Dashboard",href:"/portal/credit",icon:LayoutDashboard},
