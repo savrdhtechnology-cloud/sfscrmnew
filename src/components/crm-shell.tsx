@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
-const nav = [
+const ownerNav = [
   { label:"Dashboard", href:"/portal/owner", icon:LayoutDashboard },
   { label:"Leads", href:"/crm/leads", icon:UserRoundPlus },
   { label:"Applications", href:"/crm/applications", icon:FileText },
@@ -24,6 +24,63 @@ const nav = [
   { label:"Documents", href:"/crm/documents", icon:FolderOpen },
   { label:"Reports", href:"/crm/reports", icon:BarChart3 }
 ];
+
+const roleNav:Record<string,typeof ownerNav> = {
+  customer:[
+    {label:"Dashboard",href:"/portal/customer",icon:LayoutDashboard},
+    {label:"My Applications",href:"/portal/customer#applications",icon:FileText},
+    {label:"Documents",href:"/portal/customer#documents",icon:FolderOpen},
+    {label:"Offers & Sanctions",href:"/portal/customer#offers",icon:BadgeIndianRupee},
+    {label:"Notifications",href:"/portal/customer#notifications",icon:Bell}
+  ],
+  partner:[
+    {label:"Dashboard",href:"/portal/partner",icon:LayoutDashboard},
+    {label:"Referrals",href:"/portal/partner#referrals",icon:UserRoundPlus},
+    {label:"Applications",href:"/portal/partner#applications",icon:FileText},
+    {label:"Documents",href:"/portal/partner#documents",icon:FolderOpen},
+    {label:"Commission",href:"/portal/partner#commission",icon:ReceiptIndianRupee}
+  ],
+  employee:[
+    {label:"Dashboard",href:"/portal/employee",icon:LayoutDashboard},
+    {label:"Assigned Leads",href:"/portal/employee#leads",icon:UserRoundPlus},
+    {label:"Applications",href:"/portal/employee#applications",icon:FileText},
+    {label:"Follow-ups",href:"/portal/employee#followups",icon:ListChecks},
+    {label:"Documents",href:"/portal/employee#documents",icon:FolderOpen},
+    {label:"Tasks",href:"/portal/employee#tasks",icon:CheckCircle2}
+  ],
+  credit:[
+    {label:"Dashboard",href:"/portal/credit",icon:LayoutDashboard},
+    {label:"Credit Queue",href:"/portal/credit#queue",icon:BadgeIndianRupee},
+    {label:"Financial Analysis",href:"/portal/credit#analysis",icon:BarChart3},
+    {label:"Risk Flags",href:"/portal/credit#risk",icon:ShieldCheck},
+    {label:"Lender Matching",href:"/portal/credit#matching",icon:Landmark},
+    {label:"Submissions",href:"/portal/credit#submissions",icon:FileText}
+  ],
+  manager:[
+    {label:"Dashboard",href:"/portal/manager",icon:LayoutDashboard},
+    {label:"Loan Pipeline",href:"/portal/manager#pipeline",icon:ListChecks},
+    {label:"Assignments",href:"/portal/manager#assignments",icon:Users},
+    {label:"Approvals",href:"/portal/manager#approvals",icon:CheckCircle2},
+    {label:"Team Analytics",href:"/portal/manager#analytics",icon:BarChart3},
+    {label:"Escalations",href:"/portal/manager#escalations",icon:Bell}
+  ],
+  finance:[
+    {label:"Dashboard",href:"/portal/finance",icon:LayoutDashboard},
+    {label:"Verification Queue",href:"/portal/finance#verification",icon:ShieldCheck},
+    {label:"Disbursements",href:"/portal/finance#disbursements",icon:BadgeIndianRupee},
+    {label:"Payments",href:"/portal/finance#payments",icon:WalletCards},
+    {label:"Commission",href:"/portal/finance#commission",icon:ReceiptIndianRupee},
+    {label:"Reconciliation",href:"/portal/finance#reconciliation",icon:ListChecks}
+  ],
+  lender:[
+    {label:"Dashboard",href:"/portal/lender",icon:LayoutDashboard},
+    {label:"Assigned Applications",href:"/portal/lender#applications",icon:FileText},
+    {label:"Queries",href:"/portal/lender#queries",icon:MessageCircle},
+    {label:"Sanctions",href:"/portal/lender#sanctions",icon:BadgeIndianRupee},
+    {label:"Status Updates",href:"/portal/lender#updates",icon:ListChecks}
+  ],
+  owner:ownerNav
+};
 
 export function CrmShell({
   children,
@@ -69,6 +126,7 @@ export function CrmShell({
   },[]);
 
   const unread=notifications.filter(n=>!n.read).length;
+  const nav=roleNav[role]||ownerNav;
 
   async function markRead(n:any){
     if(n.live){
@@ -104,7 +162,7 @@ export function CrmShell({
               <span>{label}</span>
             </Link>
           ))}
-          <Link href="/crm/settings" className="lux-nav-item"><Settings size={18}/><span>Settings</span></Link>
+          {role==="owner"&&<Link href="/crm/settings" className="lux-nav-item"><Settings size={18}/><span>Settings</span></Link>}
         </nav>
 
         <div className="lux-grow-card">
