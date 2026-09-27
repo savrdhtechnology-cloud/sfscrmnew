@@ -270,7 +270,7 @@ export function LeadDetailWorkspace({leadId}:{leadId:string}){
         const appId=crypto.randomUUID();
         const app={
           id:appId,
-          applicationNo:"WORK-APP-"+appId.slice(0,8).toUpperCase(),
+          applicationNo:"APP"+new Date().toISOString().slice(0,10).replaceAll("-","")+appId.replaceAll("-","").slice(0,5).toUpperCase(),
           createdAt:new Date().toISOString(),
           customerId,
           customer:lead.name,
