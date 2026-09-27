@@ -9,6 +9,7 @@ import { PORTALS } from "@/lib/portals";
 import { ROLES, type Role } from "@/lib/rbac";
 import { CrmShell } from "@/components/crm-shell";
 import { PartnerPortalWorkspace } from "@/components/partner-portal-workspace";
+import { RolePortalWorkspace } from "@/components/role-portal-workspace";
 import { DEMO_LEADS } from "@/lib/demo-data";
 
 const titles:Record<Role,string>={
@@ -55,6 +56,7 @@ export default async function PortalPage({params}:{params:Promise<{role:string}>
   const typedRole=role as Role;
   const portal=PORTALS[typedRole];
   if(typedRole==="partner") return <PartnerPortalWorkspace/>;
+  if(typedRole!=="owner") return <RolePortalWorkspace role={typedRole}/>;
 
   return (
     <CrmShell active={activeMap[typedRole]} role={typedRole}>
