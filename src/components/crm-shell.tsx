@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, UserRoundPlus, FileText, BadgeIndianRupee, Landmark,
   WalletCards, Handshake, BarChart3, FolderOpen, Settings, Bell, Search,
   ChevronDown, ShieldCheck, ListChecks, ReceiptIndianRupee, Headphones,
-  MessageCircle, CalendarDays, Sun, Moon
+  MessageCircle, CalendarDays, Sun, Moon, CheckCircle2
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
