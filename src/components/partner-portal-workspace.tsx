@@ -273,11 +273,15 @@ export function PartnerPortalWorkspace(){
     window.addEventListener("savrdh-crm-update",sync);
     window.addEventListener("storage",sync);
     window.addEventListener("hashchange",hashAction);
+    window.addEventListener("savrdh-portal-nav",hashAction as EventListener);
+    window.addEventListener("popstate",hashAction);
     hashAction();
     return()=>{
       window.removeEventListener("savrdh-crm-update",sync);
       window.removeEventListener("storage",sync);
       window.removeEventListener("hashchange",hashAction);
+      window.removeEventListener("savrdh-portal-nav",hashAction as EventListener);
+      window.removeEventListener("popstate",hashAction);
     };
   },[]);
 
