@@ -913,3 +913,62 @@
 .lead-preview-actions button{border:1px solid #dfe5ea;background:#fff;color:#45576d}
 .lead-360-button{border:0;background:linear-gradient(135deg,#e6b64f,#b87915);color:#20190f;box-shadow:0 6px 14px rgba(177,119,25,.18)}
 @media(max-width:650px){.lead-preview-summary{grid-template-columns:1fr}.lead-preview-actions{display:grid;grid-template-columns:1fr 1fr}}
+
+
+/* Functional CRM notification dropdown */
+.lux-notification-wrap{position:relative}
+.lux-notification-wrap .lux-bell{
+  position:relative;
+  border:0;
+  cursor:pointer;
+  display:grid;
+  place-items:center;
+}
+.lux-notification-menu{
+  position:absolute;
+  right:0;
+  top:48px;
+  width:360px;
+  max-height:480px;
+  overflow:hidden;
+  background:#fff;
+  border:1px solid #e1e6eb;
+  border-radius:12px;
+  box-shadow:0 22px 55px rgba(15,23,42,.18);
+  z-index:1400;
+}
+.lux-notification-head{
+  height:46px;
+  padding:0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid #edf0f3;
+}
+.lux-notification-head strong{font-size:12px;color:#17233a}
+.lux-notification-head a{font-size:9.5px;color:#9b6a17;font-weight:800}
+.lux-notification-list{max-height:420px;overflow:auto}
+.lux-notification-list>button{
+  width:100%;
+  border:0;
+  border-bottom:1px solid #f0f2f4;
+  background:#fffaf0;
+  padding:10px 12px;
+  display:grid;
+  grid-template-columns:8px 1fr;
+  gap:8px;
+  text-align:left;
+  cursor:pointer;
+}
+.lux-notification-list>button.read{background:#fff}
+.lux-notification-list>button:hover{background:#f7f9fb}
+.lux-notification-list>button>i{
+  width:7px;height:7px;border-radius:50%;background:#d99725;margin-top:5px
+}
+.lux-notification-list>button.read>i{background:#cdd5de}
+.lux-notification-list>button>div{display:grid;gap:2px}
+.lux-notification-list strong{font-size:10.5px;color:#23364d}
+.lux-notification-list span{font-size:9.5px;color:#617287;line-height:1.35}
+.lux-notification-list small{font-size:8.5px!important;color:#909ba7}
+.lux-notification-empty{padding:28px;text-align:center;font-size:10px;color:#8995a3}
+@media(max-width:650px){.lux-notification-menu{position:fixed;top:72px;left:12px;right:12px;width:auto}}
